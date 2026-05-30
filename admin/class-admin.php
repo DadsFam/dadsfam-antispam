@@ -13,12 +13,13 @@ class DFSAS_Admin {
         add_action( 'admin_menu',             [ $this, 'register_menus' ] );
         add_action( 'admin_init',             [ $this, 'register_settings' ] );
         add_action( 'admin_enqueue_scripts',  [ $this, 'enqueue_assets' ] );
-        add_action( 'wp_ajax_dfsas_delete_log',          [ $this, 'ajax_delete_log'    ] );
-        add_action( 'wp_ajax_dfsas_clear_logs',          [ $this, 'ajax_clear_logs'    ] );
-        add_action( 'wp_ajax_dfsas_export_csv',          [ $this, 'ajax_export_csv'    ] );
-        add_action( 'wp_ajax_dfsas_unblock_ip',          [ $this, 'ajax_unblock_ip'    ] );
-        add_action( 'wp_ajax_dfsas_test_email',          [ $this, 'ajax_test_email'    ] );
+        add_action( 'wp_ajax_dfsas_delete_log',          [ $this, 'ajax_delete_log'         ] );
+        add_action( 'wp_ajax_dfsas_clear_logs',          [ $this, 'ajax_clear_logs'         ] );
+        add_action( 'wp_ajax_dfsas_export_csv',          [ $this, 'ajax_export_csv'         ] );
+        add_action( 'wp_ajax_dfsas_unblock_ip',          [ $this, 'ajax_unblock_ip'         ] );
+        add_action( 'wp_ajax_dfsas_test_email',          [ $this, 'ajax_test_email'         ] );
         add_action( 'wp_ajax_dfsas_upload_domain_list',  [ $this, 'ajax_upload_domain_list' ] );
+        add_action( 'wp_ajax_dfsas_quick_block',         [ $this, 'ajax_quick_block'        ] );
     }
 
     // ─── Menu Registration ────────────────────────────────────────────────────
@@ -115,10 +116,13 @@ class DFSAS_Admin {
         $checkboxes = [
             'enable_honeypot','enable_time_check','enable_rate_limiter','enable_blocklist',
             'enable_content_filter','enable_email_validator','enable_dnsbl','enable_geo_block',
-            'enable_log_cleanup','enable_email_digest', 'enable_auto_update',
+            'enable_log_cleanup','enable_email_digest', 'enable_auto_update', 'enable_recaptcha',
             'honeypot_cf7','honeypot_wpforms','honeypot_ninjaforms','honeypot_gravityforms',
             'honeypot_fluentforms','honeypot_generic',
             'block_disposable_emails','check_mx_records','block_html_in_message','log_blocked',
+            'recaptcha_cf7','recaptcha_wpforms','recaptcha_ninjaforms','recaptcha_gravityforms',
+            'recaptcha_fluentforms','recaptcha_wp_login','recaptcha_wp_registration',
+            'recaptcha_wp_lostpassword','recaptcha_woo_checkout','recaptcha_generic',
         ];
         foreach ( $checkboxes as $key ) {
             $clean[ $key ] = ! empty( $raw[ $key ] ) ? 1 : 0;
@@ -159,6 +163,16 @@ class DFSAS_Admin {
         if ( isset( $raw['domain_list_frequency'] ) )
             $clean['domain_list_frequency'] = in_array( $raw['domain_list_frequency'], [ 'daily', 'weekly' ], true )
                 ? $raw['domain_list_frequency'] : 'weekly';
+
+        // reCAPTCHA
+        if ( isset( $raw['recaptcha_version'] ) )
+            $clean['recaptcha_version'] = in_array( $raw['recaptcha_version'], [ 'v3', 'v2_invisible', 'v2_checkbox' ], true ) ? $raw['recaptcha_version'] : 'v3';
+        if ( isset( $raw['recaptcha_site_key'] ) )
+            $clean['recaptcha_site_key'] = sanitize_text_field( $raw['recaptcha_site_key'] );
+        if ( isset( $raw['recaptcha_secret_key'] ) )
+            $clean['recaptcha_secret_key'] = sanitize_text_field( $raw['recaptcha_secret_key'] );
+        if ( isset( $raw['recaptcha_v3_threshold'] ) )
+            $clean['recaptcha_v3_threshold'] = min( 0.9, max( 0.1, (float) $raw['recaptcha_v3_threshold'] ) );
 
         return $clean;
     }
@@ -231,24 +245,56 @@ class DFSAS_Admin {
     public function ajax_unblock_ip(): void {
         $this->verify_ajax();
         $ip = sanitize_text_field( $_POST['ip'] ?? '' );
-        if ( ! $ip ) { wp_send_json_error( 'No IP provided' ); return; }
+        if ( $ip ) DFSAS_RateLimiter::unblock_ip( $ip );
+        wp_send_json_success();
+    }
 
-        // 1. Clear rate-limit and lockout transients immediately.
-        DFSAS_RateLimiter::unblock_ip( $ip );
+    public function ajax_quick_block(): void {
+        $this->verify_ajax();
 
-        // 2. Add to permanent whitelist so the unblock survives future requests.
-        //    Works on free tier — admin MUST be able to whitelist their own IP.
-        $opts      = (array) get_option( 'dfsas_options', [] );
-        $current   = trim( $opts['whitelisted_ips'] ?? '' );
-        $existing  = array_filter( array_map( 'trim', explode( "\n", $current ) ) );
+        $type  = sanitize_text_field( $_POST['block_type']  ?? '' );
+        $value = sanitize_text_field( $_POST['block_value'] ?? '' );
 
-        if ( ! in_array( $ip, $existing, true ) ) {
-            $existing[] = $ip;
-            $opts['whitelisted_ips'] = implode( "\n", $existing );
-            update_option( 'dfsas_options', $opts );
+        if ( ! $type || ! $value ) {
+            wp_send_json_error( __( 'Missing type or value.', 'dadsfam-antispam' ) );
         }
 
-        wp_send_json_success( [ 'message' => "IP {$ip} unblocked and whitelisted permanently." ] );
+        $map = [
+            'ip'     => 'blocked_ips',
+            'email'  => 'blocked_emails',
+            'domain' => 'blocked_domains',
+            'keyword'=> 'blocked_keywords',
+        ];
+
+        if ( ! isset( $map[ $type ] ) ) {
+            wp_send_json_error( __( 'Invalid block type.', 'dadsfam-antispam' ) );
+        }
+
+        $opts    = get_option( 'dfsas_options', [] );
+        $key     = $map[ $type ];
+        $current = DFSAS_Helpers::textarea_to_array( $opts[ $key ] ?? '' );
+
+        // Check for duplicate
+        if ( in_array( strtolower( $value ), array_map( 'strtolower', $current ), true ) ) {
+            wp_send_json_success( [
+                'message'       => sprintf( __( '%s is already in the %s list.', 'dadsfam-antispam' ), $value, $type ),
+                'already_exists'=> true,
+            ] );
+        }
+
+        $current[]   = $value;
+        $opts[ $key ] = DFSAS_Helpers::array_to_textarea( $current );
+        update_option( 'dfsas_options', $opts );
+
+        wp_send_json_success( [
+            'message' => sprintf(
+                __( '✅ %s added to %s blocklist (%d total).', 'dadsfam-antispam' ),
+                esc_html( $value ),
+                $type,
+                count( $current )
+            ),
+            'count' => count( $current ),
+        ] );
     }
 
     public function ajax_upload_domain_list(): void {

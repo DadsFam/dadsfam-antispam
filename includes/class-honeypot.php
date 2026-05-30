@@ -22,6 +22,16 @@ class DFSAS_Honeypot {
             add_filter( 'wpcf7_form_elements',          [ $this, 'inject_into_cf7' ] );
             add_filter( 'wpcf7_spam',                   [ $this, 'check_cf7' ], 10, 2 );
         }
+        // Always strip our hidden fields from CF7 emails — regardless of whether
+        // honeypot_cf7 is on, since reCAPTCHA and time-check fields need cleaning too
+        add_filter( 'wpcf7_posted_data',     [ $this, 'clean_cf7_posted_data' ] );
+        // Belt-and-suspenders: strip from the built email body directly too
+        add_filter( 'wpcf7_mail_components', [ $this, 'clean_cf7_mail_body'   ], 10, 3 );
+        // Final guarantee: filter wp_mail itself — our field names always follow
+        // the pattern wp_[8 hex chars] so this is safe and targeted.
+        // No admin/AJAX exclusion here — CF7 fires via admin-ajax.php so we must
+        // always run this regardless of context.
+        add_filter( 'wp_mail', [ $this, 'clean_wp_mail_body' ] );
 
         // ── WPForms ───────────────────────────────────────────────────────────
         if ( $this->opts['honeypot_wpforms'] ) {
@@ -121,6 +131,68 @@ HTML;
         return str_replace( '</form>', $this->honeypot_html() . '</form>', $content );
     }
 
+    /**
+     * Remove all our injected hidden fields from CF7's posted data array.
+     * Without this, CF7's [all-fields] tag includes them in the email body.
+     */
+    public function clean_cf7_posted_data( array $data ): array {
+        unset(
+            $data[ DFSAS_Helpers::honeypot_field_name() ],
+            $data[ DFSAS_Helpers::timestamp_field_name() ],
+            $data['dfsas_rc_token'],
+            $data['g-recaptcha-response']
+        );
+        return $data;
+    }
+
+    /**
+     * Strip our injected hidden fields from any outgoing email body.
+     * Our fields always follow the pattern wp_[8 hex chars] — safe and specific.
+     * No admin/AJAX exclusion — CF7 sends via admin-ajax.php so must always run.
+     */
+    public function clean_wp_mail_body( array $atts ): array {
+        if ( empty( $atts['message'] ) ) return $atts;
+
+        $message = $atts['message'];
+
+        // Remove lines matching our rotating field name pattern: wp_ + 8 hex chars
+        $message = preg_replace( '/^wp_[0-9a-f]{8}\s*:.*\r?\n?/m', '', $message );
+
+        // Remove reCAPTCHA token lines
+        $message = preg_replace( '/^(dfsas_rc_token|g-recaptcha-response)\s*:.*\r?\n?/m', '', $message );
+
+        // Clean up any resulting extra blank lines
+        $message = preg_replace( '/(\r?\n){3,}/', "\n\n", $message );
+
+        $atts['message'] = $message;
+        return $atts;
+    }
+
+    /**
+     * Belt-and-suspenders: strip our field names from the built email body.
+     * Catches any CF7 version that bypasses wpcf7_posted_data.
+     */
+    public function clean_cf7_mail_body( array $components ): array {
+        $hp = preg_quote( DFSAS_Helpers::honeypot_field_name(), '/' );
+        $ts = preg_quote( DFSAS_Helpers::timestamp_field_name(), '/' );
+
+        $fields_pattern = '(' . $hp . '|' . $ts . '|dfsas_rc_token|g-recaptcha-response)';
+
+        foreach ( [ 'body', 'body_2' ] as $key ) {
+            if ( empty( $components[ $key ] ) ) continue;
+            // Remove any line that starts with one of our field names
+            $components[ $key ] = preg_replace(
+                '/^' . $fields_pattern . '\s*:.*\n?/m',
+                '',
+                $components[ $key ]
+            );
+            // Clean up any resulting triple blank lines
+            $components[ $key ] = preg_replace( '/\n{3,}/', "\n\n", $components[ $key ] );
+        }
+
+        return $components;
+    }
+
     public function check_cf7( bool $spam, $submission ): bool {
         if ( $spam ) return true; // already caught by CF7 itself
         $result = $this->run_check();
@@ -217,7 +289,12 @@ HTML;
      * we flag the outgoing wp_mail before it fires.
      */
     public function check_wp_mail( array $atts ): array {
-        // Only block if we have POST data with a filled honeypot
+        // Don't interfere with admin AJAX emails from other plugins
+        if ( wp_doing_ajax() && is_admin() ) return $atts;
+
+        // Only run on form submissions we injected into — not WooCommerce/system emails
+        if ( empty( $_POST[ DFSAS_Helpers::timestamp_field_name() ] ) ) return $atts;
+
         $hp = DFSAS_Helpers::honeypot_field_name();
         if ( isset( $_POST[ $hp ] ) && '' !== $_POST[ $hp ] ) {
             $this->block_and_log( 'generic-form', 'honeypot_filled_generic' );

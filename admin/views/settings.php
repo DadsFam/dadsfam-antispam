@@ -59,8 +59,7 @@ $is_pro = DFSAS_Helpers::is_pro();
                         'honeypot_ninjaforms'   => 'Ninja Forms',
                         'honeypot_gravityforms' => 'Gravity Forms',
                         'honeypot_fluentforms'  => 'Fluent Forms',
-                        'honeypot_generic'      => __('Generic (JS — all forms)','dadsfam-antispam'),
-                    ];
+                        'honeypot_generic'      => __('Generic (JS — all forms)','dadsfam-antispam'),                    ];
                     foreach ($integrations as $key => $label) :
                     ?>
                     <div class="dfsas-setting-row">
@@ -296,6 +295,78 @@ $is_pro = DFSAS_Helpers::is_pro();
                     <p id="dfsas-upload-msg" style="font-size:13px;margin-top:8px;min-height:18px"></p>
                     <p class="dfsas-muted" style="font-size:11px;margin-top:4px"><?php esc_html_e('Plain .txt file, one domain per line (e.g. mailinator.com). Lines starting with # are ignored. Max 5 MB.','dadsfam-antispam'); ?></p>
                 </div>
+            </div>
+
+            <!-- ── Google reCAPTCHA (FREE) ───────────────────────────────────── -->
+            <div class="dfsas-card">
+                <h2 class="dfsas-card__title">🤖 <?php esc_html_e('Google reCAPTCHA','dadsfam-antispam'); ?> <span class="dfsas-badge" style="background:#4285f4;color:#fff">FREE</span></h2>
+                <p class="dfsas-card__desc"><?php esc_html_e('Adds Google reCAPTCHA to your forms. Get your free keys at google.com/recaptcha — supports v2 Checkbox, v2 Invisible, and v3 (score-based, fully invisible).','dadsfam-antispam'); ?></p>
+
+                <div class="dfsas-field-row">
+                    <label class="dfsas-toggle"><input type="checkbox" name="dfsas_options[enable_recaptcha]" value="1" <?php checked(!empty($opts['enable_recaptcha'])); ?> /><span class="dfsas-toggle__slider"></span></label>
+                    <div class="dfsas-setting__text"><strong><?php esc_html_e('Enable Google reCAPTCHA','dadsfam-antispam'); ?></strong></div>
+                </div>
+
+                <div class="dfsas-field-row">
+                    <label><?php esc_html_e('reCAPTCHA Version','dadsfam-antispam'); ?></label>
+                    <select name="dfsas_options[recaptcha_version]">
+                        <option value="v3"           <?php selected($opts['recaptcha_version']??'v3','v3'); ?>><?php esc_html_e('v3 — Invisible, score-based (recommended)','dadsfam-antispam'); ?></option>
+                        <option value="v2_invisible" <?php selected($opts['recaptcha_version']??'','v2_invisible'); ?>><?php esc_html_e('v2 Invisible — no user interaction','dadsfam-antispam'); ?></option>
+                        <option value="v2_checkbox"  <?php selected($opts['recaptcha_version']??'','v2_checkbox'); ?>><?php esc_html_e('v2 Checkbox — "I\'m not a robot" tick box','dadsfam-antispam'); ?></option>
+                    </select>
+                </div>
+
+                <div class="dfsas-field-row">
+                    <label><?php esc_html_e('Site Key (public)','dadsfam-antispam'); ?></label>
+                    <input type="text" name="dfsas_options[recaptcha_site_key]" value="<?php echo esc_attr($opts['recaptcha_site_key']??''); ?>" class="large-text" placeholder="6Lc..." autocomplete="off" />
+                </div>
+
+                <div class="dfsas-field-row">
+                    <label><?php esc_html_e('Secret Key (private)','dadsfam-antispam'); ?></label>
+                    <input type="password" name="dfsas_options[recaptcha_secret_key]" value="<?php echo esc_attr($opts['recaptcha_secret_key']??''); ?>" class="large-text" placeholder="6Lc..." autocomplete="off" />
+                    <span class="dfsas-hint"><?php printf(esc_html__('Get your free keys at %s — register your domain for the version you choose.','dadsfam-antispam'),'<a href="https://www.google.com/recaptcha/admin" target="_blank">google.com/recaptcha/admin</a>'); ?></span>
+                </div>
+
+                <div class="dfsas-field-row" id="dfsas-v3-threshold-row" <?php echo ($opts['recaptcha_version']??'v3') !== 'v3' ? 'style="display:none"' : ''; ?>>
+                    <label><?php esc_html_e('v3 Score Threshold','dadsfam-antispam'); ?></label>
+                    <input type="number" name="dfsas_options[recaptcha_v3_threshold]" value="<?php echo esc_attr($opts['recaptcha_v3_threshold']??0.5); ?>" min="0.1" max="0.9" step="0.1" class="small-text" />
+                    <span class="dfsas-hint"><?php esc_html_e('0.0 = definitely bot, 1.0 = definitely human. Block if score is below this. Recommended: 0.5','dadsfam-antispam'); ?></span>
+                </div>
+
+                <h3 style="font-size:13px;font-weight:700;margin:16px 0 8px;color:var(--df-text)"><?php esc_html_e('Apply reCAPTCHA to:','dadsfam-antispam'); ?></h3>
+                <div class="dfsas-settings-grid dfsas-settings-grid--compact">
+                    <?php
+                    $rc_locations = [
+                        'recaptcha_cf7'             => 'Contact Form 7',
+                        'recaptcha_wpforms'         => 'WPForms',
+                        'recaptcha_ninjaforms'      => 'Ninja Forms',
+                        'recaptcha_gravityforms'    => 'Gravity Forms',
+                        'recaptcha_fluentforms'     => 'Fluent Forms',
+                        'recaptcha_wp_login'        => __('WordPress Login','dadsfam-antispam'),
+                        'recaptcha_wp_registration' => __('WordPress Registration','dadsfam-antispam'),
+                        'recaptcha_wp_lostpassword' => __('WordPress Lost Password','dadsfam-antispam'),
+                        'recaptcha_woo_checkout'    => __('WooCommerce Checkout','dadsfam-antispam'),
+                        'recaptcha_generic'         => __('Generic HTML Forms (JS)','dadsfam-antispam'),
+                    ];
+                    foreach ($rc_locations as $key => $label) :
+                    ?>
+                    <div class="dfsas-setting-row">
+                        <label class="dfsas-toggle"><input type="checkbox" name="dfsas_options[<?php echo esc_attr($key); ?>]" value="1" <?php checked(!empty($opts[$key])); ?> /><span class="dfsas-toggle__slider"></span></label>
+                        <div class="dfsas-setting__text"><strong><?php echo esc_html($label); ?></strong></div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="dfsas-notice dfsas-notice--info dfsas-notice--sm" style="margin-top:14px">
+                    💡 <?php esc_html_e('If a form plugin (e.g. CF7, WPForms) already has its own reCAPTCHA enabled, disable it there first to avoid double verification.','dadsfam-antispam'); ?>
+                </div>
+
+                <?php if (!empty($opts['recaptcha_site_key']) && !empty($opts['recaptcha_secret_key'])) : ?>
+                <div class="dfsas-field-row" style="margin-top:12px">
+                    <button type="button" class="dfsas-btn dfsas-btn--secondary dfsas-btn--sm" id="dfsas-test-recaptcha">🧪 <?php esc_html_e('Test reCAPTCHA Keys','dadsfam-antispam'); ?></button>
+                    <span id="dfsas-recaptcha-test-msg" style="font-size:13px;margin-left:10px"></span>
+                </div>
+                <?php endif; ?>
             </div>
 
             <!-- ── Logging ────────────────────────────────────────────────── -->

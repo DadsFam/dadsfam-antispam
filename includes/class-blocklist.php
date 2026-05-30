@@ -22,10 +22,8 @@ class DFSAS_Blocklist {
         $this->blocked_emails     = DFSAS_Helpers::textarea_to_array( $opts['blocked_emails']    ?? '' );
         $this->blocked_domains    = DFSAS_Helpers::textarea_to_array( $opts['blocked_domains']   ?? '' );
         $this->blocked_keywords   = DFSAS_Helpers::textarea_to_array( $opts['blocked_keywords']  ?? '' );
-        // Whitelisted IPs/emails are always loaded — admin must be able to unblock
-        // their own IP even on free tier. PRO features (geo, DNSBL) remain gated.
-        $this->whitelisted_ips    = DFSAS_Helpers::textarea_to_array( $opts['whitelisted_ips']    ?? '' );
-        $this->whitelisted_emails = DFSAS_Helpers::textarea_to_array( $opts['whitelisted_emails'] ?? '' );
+        $this->whitelisted_ips    = DFSAS_Helpers::is_pro() ? DFSAS_Helpers::textarea_to_array( $opts['whitelisted_ips']    ?? '' ) : [];
+        $this->whitelisted_emails = DFSAS_Helpers::is_pro() ? DFSAS_Helpers::textarea_to_array( $opts['whitelisted_emails'] ?? '' ) : [];
 
         // Enforce free cap
         if ( ! DFSAS_Helpers::is_pro() ) {
@@ -120,18 +118,15 @@ class DFSAS_Blocklist {
     }
 
     public function filter_wp_mail( array $atts ): array {
-        // Never filter emails sent by admin/shop-manager users.
-        // This covers invoice plugin resends, WooCommerce order emails,
-        // and any other internal plugin communication. The keyword filter
-        // is only intended to block spam from public form submissions.
-        if ( current_user_can( 'manage_options' ) || current_user_can( 'manage_woocommerce' ) ) {
-            return $atts;
-        }
+        // Skip admin AJAX (booking plugins, scheduling tools etc.)
+        if ( wp_doing_ajax() && is_admin() ) return $atts;
 
-        // Also skip during WordPress cron jobs (scheduled WC emails etc.)
-        if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
-            return $atts;
-        }
+        // CRITICAL: Only filter emails from form submissions we injected into.
+        // Our timestamp field is added to every monitored form via PHP/JS.
+        // WooCommerce order emails, password resets, system notifications etc.
+        // fire outside any form context — they will never have this field.
+        // Without this check we block legitimate WooCommerce/system emails.
+        if ( empty( $_POST[ DFSAS_Helpers::timestamp_field_name() ] ) ) return $atts;
 
         $body    = $atts['message'] ?? '';
         $subject = $atts['subject'] ?? '';
@@ -146,15 +141,7 @@ class DFSAS_Blocklist {
                 'details'   => [ 'keyword' => $check['keyword'] ],
                 'score'     => 8,
             ] );
-            // Cancel the email cleanly via pre_wp_mail (WP 5.7+) instead of
-            // setting an invalid TO address which causes a PHPMailer exception.
-            // We use a self-removing closure so only this one email is cancelled.
-            $cancel = null;
-            $cancel = function() use ( &$cancel ) {
-                remove_filter( 'pre_wp_mail', $cancel, 99 );
-                return false; // false = cancel this send
-            };
-            add_filter( 'pre_wp_mail', $cancel, 99 );
+            $atts['to'] = 'blocked@localhost'; // divert silently
         }
         return $atts;
     }

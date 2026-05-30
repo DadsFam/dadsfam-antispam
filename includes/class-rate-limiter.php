@@ -38,13 +38,6 @@ class DFSAS_RateLimiter {
     }
 
     public function is_rate_limited( string $ip ): bool {
-        // Always allow whitelisted IPs regardless of rate-limit state.
-        $opts     = (array) get_option( 'dfsas_options', [] );
-        $wl_raw   = trim( $opts['whitelisted_ips'] ?? '' );
-        if ( $wl_raw ) {
-            $whitelisted = array_filter( array_map( 'trim', explode( "\n", $wl_raw ) ) );
-            if ( in_array( $ip, $whitelisted, true ) ) return false;
-        }
         // Under lockout?
         if ( get_transient( $this->lockout_key( $ip ) ) !== false ) {
             return true;

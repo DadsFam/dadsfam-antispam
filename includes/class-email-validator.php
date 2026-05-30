@@ -27,6 +27,10 @@ class DFSAS_EmailValidator {
         'anonbox.net','filzmail.com','no-spam.ws','nospamfor.us',
     ];
 
+    public static function get_free_list(): array {
+        return self::DISPOSABLE_DOMAINS_FREE;
+    }
+
     public function __construct( array $opts ) {
         $this->opts = $opts;
         $this->register_hooks();

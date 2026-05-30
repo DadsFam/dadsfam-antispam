@@ -257,3 +257,30 @@
 
 /* ── Domain List Upload ────────────────────────────────────────────────────── */
 .dfsas-upload-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* ── Log Stats Strip ───────────────────────────────────────────────────────── */
+.dfsas-log-stats-strip { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.dfsas-log-stat { background: #fff; border-radius: var(--df-radius); padding: 12px 20px; box-shadow: var(--df-shadow); display: flex; flex-direction: column; align-items: center; min-width: 100px; }
+.dfsas-log-stat strong { font-size: 20px; font-weight: 800; color: var(--df-blue); line-height: 1; }
+.dfsas-log-stat span { font-size: 11px; color: var(--df-gray-5); margin-top: 3px; text-transform: uppercase; letter-spacing: .04em; }
+
+/* ── Actions Column ────────────────────────────────────────────────────────── */
+.dfsas-td--actions { white-space: nowrap; }
+.dfsas-action-group { display: flex; align-items: center; gap: 4px; }
+
+/* ── Quick Block ───────────────────────────────────────────────────────────── */
+.dfsas-qb-wrap { position: relative; display: inline-block; }
+.dfsas-qb-menu { display: none; position: absolute; right: 0; top: 100%; z-index: 200; background: #fff; border: 1px solid var(--df-gray-2); border-radius: var(--df-radius); box-shadow: var(--df-shadow-md); min-width: 240px; padding: 8px 0; margin-top: 4px; }
+.dfsas-qb-menu.open { display: block; }
+.dfsas-qb-menu__title { font-size: 10px; font-weight: 700; color: var(--df-gray-5); text-transform: uppercase; letter-spacing: .06em; padding: 4px 12px 8px; border-bottom: 1px solid var(--df-gray-2); margin-bottom: 4px; }
+.dfsas-qb-btn { display: block; width: 100%; text-align: left; background: none; border: none; padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--df-text); cursor: pointer; transition: background .1s; line-height: 1.4; }
+.dfsas-qb-btn:hover { background: var(--df-gray-1); }
+.dfsas-qb-btn:disabled { opacity: .6; cursor: default; }
+.dfsas-qb-menu__msg { font-size: 11px; padding: 6px 14px 4px; min-height: 20px; border-top: 1px solid var(--df-gray-2); margin-top: 4px; }
+
+/* ── Details Panel ─────────────────────────────────────────────────────────── */
+.dfsas-details-row td { background: var(--df-gray-1) !important; padding: 0 !important; }
+.dfsas-details-panel { padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 12px 24px; }
+.dfsas-detail-item { display: flex; align-items: baseline; gap: 8px; font-size: 12px; }
+.dfsas-detail-item__label { font-weight: 700; color: var(--df-gray-5); min-width: 60px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; flex-shrink: 0; }
+.dfsas-detail-item a { color: var(--df-blue); word-break: break-all; }

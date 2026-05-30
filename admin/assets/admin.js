@@ -18,6 +18,57 @@
         return $.post(ajaxurl, Object.assign({ action, nonce }, data));
     }
 
+    // ── Toggle row details ────────────────────────────────────────────────
+
+    $(document).on('click', '.dfsas-toggle-details', function () {
+        const id  = $(this).data('id');
+        const $row = $('#dfsas-details-' + id);
+        const open = $row.is(':visible');
+        $row.slideToggle(150);
+        $(this).text(open ? '🔍' : '🔼');
+    });
+
+    // ── Quick Block dropdown toggle ───────────────────────────────────────
+
+    $(document).on('click', '.dfsas-qb-trigger', function (e) {
+        e.stopPropagation();
+        const $menu = $(this).siblings('.dfsas-qb-menu');
+        $('.dfsas-qb-menu').not($menu).removeClass('open');
+        $menu.toggleClass('open');
+    });
+
+    $(document).on('click', function () {
+        $('.dfsas-qb-menu').removeClass('open');
+    });
+
+    // ── Quick Block action ────────────────────────────────────────────────
+
+    $(document).on('click', '.dfsas-qb-btn', function () {
+        const $btn   = $(this).prop('disabled', true);
+        const $msg   = $(this).closest('.dfsas-qb-menu').find('.dfsas-qb-menu__msg');
+        const type   = $btn.data('type');
+        const value  = $btn.data('value');
+
+        $msg.text('Adding…').css('color','#6c757d');
+
+        ajax('dfsas_quick_block', { block_type: type, block_value: value })
+            .done(res => {
+                if (res.success) {
+                    $msg.text(res.data.message).css('color', res.data.already_exists ? '#856404' : '#1a8a4a');
+                    if (!res.data.already_exists) {
+                        $btn.text('✅ ' + $btn.text().replace(/^[^\s]+\s/,'')).css('opacity','0.6');
+                    }
+                } else {
+                    $msg.text('❌ ' + res.data).css('color','#c0392b');
+                    $btn.prop('disabled', false);
+                }
+            })
+            .fail(() => {
+                $msg.text('❌ Error. Try again.').css('color','#c0392b');
+                $btn.prop('disabled', false);
+            });
+    });
+
     // ── Delete single log entry ────────────────────────────────────────────
 
     $(document).on('click', '.dfsas-delete-log', function () {
@@ -74,12 +125,9 @@
 
         $btn.prop('disabled', true).text('…');
         ajax('dfsas_unblock_ip', { ip })
-            .done(res => {
-                $btn.text('✅ Whitelisted').prop('disabled', false);
-                setTimeout(() => {
-                    $btn.closest('tr').find('.dfsas-ip-status').text('Whitelisted');
-                    $btn.text('✅');
-                }, 2000);
+            .done(() => {
+                $btn.text('✅').prop('disabled', false);
+                setTimeout(() => $btn.text('🔓'), 2000);
             })
             .fail(() => { $btn.prop('disabled', false).text('🔓'); alert('Failed.'); });
     });
@@ -261,6 +309,33 @@
             })
             .fail(() => $msg.text('❌ Connection error.').css('color', '#c0392b'))
             .always(() => $btn.prop('disabled', false).text('Activate License'));
+    });
+
+    // ── reCAPTCHA version toggle ──────────────────────────────────────────
+
+    $(document).on('change', '[name="dfsas_options[recaptcha_version]"]', function () {
+        $('#dfsas-v3-threshold-row').toggle($(this).val() === 'v3');
+    });
+
+    // ── reCAPTCHA key test ────────────────────────────────────────────────
+
+    $(document).on('click', '#dfsas-test-recaptcha', function () {
+        const $btn = $(this).prop('disabled', true).text('Testing…');
+        const $msg = $('#dfsas-recaptcha-test-msg');
+        $msg.text('Checking…').css('color', '#6c757d');
+
+        // Just verify keys are filled — actual token test needs front-end
+        const site   = $('[name="dfsas_options[recaptcha_site_key]"]').val().trim();
+        const secret = $('[name="dfsas_options[recaptcha_secret_key]"]').val().trim();
+
+        if (!site || !secret) {
+            $msg.text('❌ Please enter both Site Key and Secret Key first.').css('color', '#c0392b');
+        } else if (!site.startsWith('6L') || !secret.startsWith('6L')) {
+            $msg.text('⚠️ Keys look unusual — Google reCAPTCHA keys usually start with 6L. Double check them.').css('color', '#856404');
+        } else {
+            $msg.text('✅ Keys are filled in correctly. Save settings then test on a live form.').css('color', '#1a8a4a');
+        }
+        $btn.prop('disabled', false).text('🧪 Test reCAPTCHA Keys');
     });
 
     // ── Settings: highlight locked PRO fields on click ────────────────────

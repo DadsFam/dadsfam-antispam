@@ -168,17 +168,13 @@ class DFSAS_ContentFilter {
     }
 
     public function filter_wp_mail( array $atts ): array {
-        // Never filter emails sent by admin/shop-manager users — covers invoice
-        // plugin resends, WooCommerce order emails, and all internal plugin mail.
-        // This filter is only for public-facing form submission content.
-        if ( current_user_can( 'manage_options' ) || current_user_can( 'manage_woocommerce' ) ) {
-            return $atts;
-        }
+        // Skip admin AJAX (booking plugins, scheduling tools etc.)
+        if ( wp_doing_ajax() && is_admin() ) return $atts;
 
-        // Skip during WordPress cron (scheduled notifications etc.).
-        if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
-            return $atts;
-        }
+        // CRITICAL: Only filter emails from form submissions we injected into.
+        // WooCommerce order emails, password resets, system notifications etc.
+        // fire outside any form context and will never have our timestamp field.
+        if ( empty( $_POST[ DFSAS_Helpers::timestamp_field_name() ] ) ) return $atts;
 
         $result = $this->analyse( $atts['message'] ?? '', $atts['subject'] ?? '' );
         if ( $result['spam'] ) {
@@ -190,14 +186,7 @@ class DFSAS_ContentFilter {
                 'score'     => $result['score'],
                 'details'   => $result['reasons'],
             ] );
-            // Cancel cleanly via pre_wp_mail instead of setting an invalid TO
-            // address (blocked@localhost causes PHPMailer "no recipient" error).
-            $cancel = null;
-            $cancel = function() use ( &$cancel ) {
-                remove_filter( 'pre_wp_mail', $cancel, 99 );
-                return false;
-            };
-            add_filter( 'pre_wp_mail', $cancel, 99 );
+            $atts['to'] = 'blocked@localhost';
         }
         return $atts;
     }

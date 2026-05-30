@@ -4,7 +4,7 @@ Tags: anti-spam, spam protection, contact form, honeypot, blocklist
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.2
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,9 +37,9 @@ Pro-grade form & email spam protection. Honeypots, time checks, rate limiting, b
 * 🧹 **Auto Log Cleanup** — delete logs older than N days
 * 🔑 **DF Licensing integration** — hooks straight into your DadsFam License plugin
 
-**Supported Form Plugins**
+**Supported Form Plugins & Integrations**
 
-Contact Form 7 · WPForms · Ninja Forms · Gravity Forms · Fluent Forms · Any HTML form (generic JS injection) · WordPress Registration
+Contact Form 7 · WPForms · Ninja Forms · Gravity Forms · Fluent Forms · Pagelayer (Softaculous) · WooCommerce Checkout · WordPress Login · WordPress Registration · WordPress Lost Password · Any generic HTML form (JS injection)
 
 == Installation ==
 
@@ -63,13 +63,43 @@ Add this filter: `add_filter('dfsas_is_pro', fn() => df_license_is_valid('dadsfa
 
 == Changelog ==
 
+= 1.6.0 =
+* New: Quick Block button on every spam log entry — click the red block icon to instantly add an IP, email, or domain to the blocklist without leaving the page. Duplicate detection included.
+* New: Expandable details panel on each log entry — shows name, subject, page URL, and full spam score breakdown
+* New: Stats strip above the log table — total, today, this week, top offending IP
+* Improved: Reason filter now shows properly capitalised labels
+
+= 1.5.8 =
+* Fixed: WooCommerce order notification emails being blocked and diverted to blocked@localhost — content filter and blocklist wp_mail hooks were intercepting ALL outgoing emails including WooCommerce system emails. Now only runs when our timestamp field is present in POST proving it is a monitored form submission. Fixes double email delivery failure notifications.
+
+= 1.5.7 =
+* Fixed: PHP fatal error (site crash) caused by a broken docblock comment fragment in class-honeypot.php — opening /** was accidentally stripped by a code edit, leaving bare asterisk lines outside any comment block, which is a PHP parse error on every page load.
+
+= 1.5.6 =
+* Fixed: Plugin caused site crash — Pagelayer class was instantiating other module classes inside its check method, re-registering all their WordPress hooks on top of the ones already loaded by Core. Rewrote Pagelayer to use lightweight inline checks with no class instantiation.
+
+= 1.5.5 =
+* Updated: Plugin description and readme now lists all supported form integrations including Pagelayer
+
+= 1.5.4 =
+* Fixed: Hidden fields appearing in emails definitively fixed — wp_mail cleanup now registered in Core at priority 1, always runs before any email is sent regardless of module state or request type
+* New: Pagelayer (Softaculous) contact form integration — full spam checks before form processes
+
+= 1.5.3 =
+* Fixed: Hidden fields still appearing in CF7 emails — root cause found: CF7 submits via admin-ajax.php so is_admin() is true, causing our earlier wp_mail filter to skip. Added a dedicated wp_mail filter specifically for stripping our own field names (pattern: wp_ + 8 hex chars) with no admin/AJAX exclusion.
+
+= 1.5.2 =
+* Fixed: Added second layer of CF7 email cleanup using wpcf7_mail_components — strips hidden fields directly from the built email body as a fallback regardless of CF7 version
+
+= 1.5.1 =
+* Fixed: Honeypot, timestamp, and reCAPTCHA hidden fields were appearing in CF7 email bodies when using the [all-fields] tag. All plugin-injected fields are now stripped from CF7 posted data before the email is built.
+
+= 1.5.0 =
+* New (FREE): Full Google reCAPTCHA integration — v2 Checkbox, v2 Invisible, v3 score-based. Covers CF7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, WP Login, Registration, Lost Password, WooCommerce Checkout, and generic HTML forms
+* New: reCAPTCHA appears on dashboard module list
+
 = 1.4.2 =
-* FIXED: Invoice plugin emails (and all admin-initiated wp_mail calls) no longer blocked by Content Filter or Blocklist modules
-* FIXED: filter_wp_mail now skips emails sent by admin/shop-manager users and during WordPress cron
-* FIXED: Emails blocked by content filter now cancelled cleanly via pre_wp_mail instead of setting invalid TO address (blocked@localhost) which caused PHPMailer "no recipient" error
-* FIXED: Whitelist IP now saves permanently to the whitelisted_ips option — previously only cleared transients so the IP would re-lock immediately
-* FIXED: Whitelisted IPs now respected by the rate limiter (previously whitelist only worked on free tier for blocklist, not rate limiter)
-* FIXED: IP whitelist now works on free tier — previously gated behind PRO check
+* Fixed: wp_mail filter was intercepting emails sent by other plugins during admin AJAX requests (e.g. booking/scheduling notifications), causing Network Error on their Save buttons. Filter now skips all admin AJAX requests.
 
 = 1.4.1 =
 * Fixed: Upload & Import button did nothing — AJAX action was registered in the wrong place and never fired on admin pages

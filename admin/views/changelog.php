@@ -12,24 +12,209 @@
 
             <div class="dfsas-changelog">
 
-
-                <!-- ── v1.4.2 ──────────────────────────────────────────────── -->
+                <!-- ── v1.6.0 ──────────────────────────────────────────────── -->
                 <div class="dfsas-changelog__version">
                     <div class="dfsas-changelog__header">
-                        <span class="dfsas-changelog__num">1.4.2</span>
-                        <span class="dfsas-changelog__date">23 May 2026</span>
+                        <span class="dfsas-changelog__num">1.6.0</span>
+                        <span class="dfsas-changelog__date">30 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Feature Update</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--new">New</span>
+                            <ul>
+                                <li><strong>Quick Block</strong> — every spam log entry now has a 🚫 button that opens a dropdown. From there you can instantly add the IP, the full email address, or just the domain to the appropriate blocklist — all in one click without leaving the page. Detects duplicates and tells you if an entry is already blocked.</li>
+                                <li><strong>Expandable Details Panel</strong> — click the 🔍 button on any log entry to see the full details: submitter name, email subject, page URL the form was on, and the specific spam signals that triggered the block (links found, matched keyword, DNSBL server, country code, score breakdown etc.).</li>
+                                <li><strong>Stats Strip</strong> — at the top of the log page, a quick summary showing total blocked, blocked today, blocked this week, and the top offending IP address.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.5.8 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.5.8</span>
+                        <span class="dfsas-changelog__date">30 May 2026</span>
                         <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
                     </div>
                     <div class="dfsas-changelog__body">
                         <div class="dfsas-changelog__group">
                             <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
                             <ul>
-                                <li><strong>Invoice &amp; plugin emails no longer blocked</strong> — both the Content Filter and Blocklist modules were intercepting admin-initiated <code>wp_mail()</code> calls (invoice resends, WooCommerce order emails, etc.) and silently diverting them to an invalid address. All <code>wp_mail</code> calls from admin or shop-manager users are now skipped by both filters.</li>
-                                <li><strong>PHPMailer "no recipient" error resolved</strong> — when content was flagged, the TO address was set to <code>blocked@localhost</code> (invalid), causing PHPMailer to throw an exception. Blocking now uses the <code>pre_wp_mail</code> hook to cancel cleanly with no error.</li>
-                                <li><strong>Whitelist IP now saves permanently</strong> — clicking the 🔓 unblock icon previously only cleared the rate-limit transient, so the IP would re-lock on the very next request. It now also writes the IP to the permanent <code>whitelisted_ips</code> option.</li>
-                                <li><strong>Whitelist respected by rate limiter</strong> — whitelisted IPs are now checked before any rate-limit logic runs, preventing them from ever being locked again.</li>
-                                <li><strong>IP whitelist available on free tier</strong> — the whitelist bypass was previously gated behind a PRO check, meaning free-tier users could save IPs but they were silently ignored.</li>
-                                <li>WordPress cron-initiated emails (scheduled WooCommerce notifications, digest emails) also excluded from both filters.</li>
+                                <li><strong>WooCommerce order emails being blocked</strong> — the content filter and blocklist <code>wp_mail</code> hooks were intercepting all outgoing emails, including WooCommerce new order notifications, password resets, and other system emails. WooCommerce order emails contain HTML, links, and order data that tripped our spam scorer, causing them to be diverted to <code>blocked@localhost</code>. This also caused double emails (SMTP delivery failure notifications). Fixed by only running the <code>wp_mail</code> filter when our injected timestamp field is present in POST — which proves it is a monitored contact form submission. System emails fire outside any form context and will never have this field.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.5.7 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.5.7</span>
+                        <span class="dfsas-changelog__date">29 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li><strong>Root cause of site crash found and fixed</strong> — a PHP fatal parse error in <code>class-honeypot.php</code>. A code edit accidentally stripped the opening <code>/**</code> from a docblock comment, leaving orphaned <code>*</code> lines sitting outside any comment block. PHP treats these as a syntax error and refuses to load the file, crashing every page. Fixed by restoring the complete docblock. All PHP files scanned — no other orphaned fragments found.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.5.6 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.5.6</span>
+                        <span class="dfsas-changelog__date">29 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li><strong>Critical: Plugin caused site crash</strong> — the Pagelayer integration class was instantiating other module classes (RateLimiter, Blocklist, ContentFilter, EmailValidator, reCAPTCHA) inside its check method. Each constructor registers WordPress hooks, so they were being registered twice — once by Core on page load and again during the form check. This double-registration caused the crash. Rewrote Pagelayer to perform all checks inline using direct logic and static helpers, with zero class instantiation.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.5.5 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.5.5</span>
+                        <span class="dfsas-changelog__date">29 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--improved">Improved</span>
+                            <ul>
+                                <li>Plugin description and readme updated to list all supported form integrations: Contact Form 7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, Pagelayer (Softaculous), WooCommerce Checkout, WordPress Login, WordPress Registration, WordPress Lost Password, and generic HTML forms</li>
+                                <li>If a listed plugin is not installed, its hooks simply never fire — zero performance impact, zero errors</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.5.4 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.5.4</span>
+                        <span class="dfsas-changelog__date">29 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Feature Update</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li><strong>Definitive fix for hidden fields in emails</strong> — the <code>wp_mail</code> body cleanup is now registered in Core at priority 1, guaranteed to run before any email leaves the server regardless of which form builder sent it, which modules are active, or what request type it is. Pattern <code>wp_[0-9a-f]{8}</code> cleanly matches our rotating field names only.</li>
+                            </ul>
+                        </div>
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--new">New</span>
+                            <ul>
+                                <li><strong>Pagelayer (Softaculous) contact form integration</strong> — hooks into Pagelayer's AJAX form action at priority 1, before the form processes. Runs all active spam checks: honeypot, time check, rate limiter, blocklist, content filter, email validator, reCAPTCHA. Returns a proper JSON error response if spam is detected so Pagelayer can display it to the user.</li>
+                                <li>Also covers <code>pagelayer_send_email</code> (Pagelayer Pro) action</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.5.3 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.5.3</span>
+                        <span class="dfsas-changelog__date">29 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li><strong>Root cause found:</strong> CF7 submits forms via <code>admin-ajax.php</code>, which means <code>is_admin()</code> returns true. Our earlier fix had an early-exit condition for admin AJAX requests (added to protect other plugins), which meant our email cleanup never ran for CF7. Fixed by adding a dedicated <code>wp_mail</code> filter that strips our field names unconditionally. Pattern <code>wp_[0-9a-f]{8}</code> is specific to our rotating field names and safe to remove from any email body.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.5.2 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.5.2</span>
+                        <span class="dfsas-changelog__date">29 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li>Hidden field names still appearing in CF7 emails — added a second cleanup layer using <code>wpcf7_mail_components</code> that strips our field names directly from the built email body using regex. This fires right before CF7 sends the email and is guaranteed to work regardless of CF7 version or configuration.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.5.1 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.5.1</span>
+                        <span class="dfsas-changelog__date">29 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li>Honeypot field, timestamp field, and reCAPTCHA token were appearing in CF7 email bodies when using the <code>[all-fields]</code> tag — CF7 picks up all POST data including injected hidden inputs. All plugin-injected fields are now stripped from CF7's posted data before the email is built, so they never show up in messages sent to the site admin.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.5.0 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.5.0</span>
+                        <span class="dfsas-changelog__date">29 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Feature Update</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--new">New</span>
+                            <ul>
+                                <li><strong>FREE: Full Google reCAPTCHA integration</strong> — all three versions supported:
+                                    <ul style="margin-top:4px">
+                                        <li><strong>v3</strong> — fully invisible, score-based (0.0–1.0). Configurable threshold. Recommended for most sites.</li>
+                                        <li><strong>v2 Invisible</strong> — no user interaction, fires silently on form submit</li>
+                                        <li><strong>v2 Checkbox</strong> — classic "I'm not a robot" tick box</li>
+                                    </ul>
+                                </li>
+                                <li>reCAPTCHA applied across all major integrations: Contact Form 7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, WordPress Login, WordPress Registration, WordPress Lost Password, WooCommerce Checkout, and generic HTML forms</li>
+                                <li>Per-location toggles — enable reCAPTCHA only where you need it</li>
+                                <li>All failed reCAPTCHA attempts are logged to the Spam Log with score</li>
+                                <li>Graceful network error handling — if Google is unreachable, the user is not blocked</li>
+                                <li>Google reCAPTCHA module now appears on the Dashboard module status list</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.4.2 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.4.2</span>
+                        <span class="dfsas-changelog__date">21 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li><strong>Important:</strong> The <code>wp_mail</code> filter was intercepting emails sent by other DadsFam plugins (booking notifications, invoice emails, etc.) during admin AJAX requests — causing "Network error" on their Save buttons. All three <code>wp_mail</code> hooks (blocklist, content filter, honeypot) now skip admin AJAX requests entirely and only run on front-end form submissions.</li>
                             </ul>
                         </div>
                     </div>

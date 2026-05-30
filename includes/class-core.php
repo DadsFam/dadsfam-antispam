@@ -21,6 +21,11 @@ class DFSAS_Core {
     public function init(): void {
         $this->options = $this->get_options();
 
+        // ── Always register: strip our injected field names from ANY outgoing email ──
+        // Runs unconditionally — CF7, Pagelayer, WPForms, any form builder.
+        // Our rotating field names always match wp_[8 hex chars] so this is safe.
+        add_filter( 'wp_mail', [ $this, 'clean_outgoing_mail' ], 1 );
+
         // Admin panel (always)
         if ( is_admin() ) {
             new DFSAS_Admin( $this->options );
@@ -49,6 +54,10 @@ class DFSAS_Core {
         if ( $opts['enable_blocklist'] )       new DFSAS_Blocklist( $opts );
         if ( $opts['enable_content_filter'] )  new DFSAS_ContentFilter( $opts );
         if ( $opts['enable_email_validator'] ) new DFSAS_EmailValidator( $opts );
+        // reCAPTCHA — FREE, boots if keys are configured
+        if ( $opts['enable_recaptcha'] )       new DFSAS_ReCaptcha( $opts );
+        // Pagelayer / Softaculous form builder
+        new DFSAS_Pagelayer( $opts );
 
         // PRO-only modules
         if ( DFSAS_Helpers::is_pro() ) {
@@ -99,6 +108,19 @@ class DFSAS_Core {
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
+    public function clean_outgoing_mail( array $atts ): array {
+        if ( empty( $atts['message'] ) ) return $atts;
+        $msg = $atts['message'];
+        // Remove lines matching our rotating field name pattern: wp_ + 8 hex chars
+        $msg = preg_replace( '/^wp_[0-9a-f]{8}\s*:.*\r?\n?/mi', '', $msg );
+        // Remove reCAPTCHA token lines
+        $msg = preg_replace( '/^(dfsas_rc_token|g-recaptcha-response)\s*:.*\r?\n?/mi', '', $msg );
+        // Clean up extra blank lines left behind
+        $msg = preg_replace( '/(\r?\n){3,}/', "\n\n", $msg );
+        $atts['message'] = $msg;
+        return $atts;
+    }
+
     public function get_options(): array {
         return wp_parse_args(
             (array) get_option( 'dfsas_options', [] ),
@@ -124,6 +146,22 @@ class DFSAS_Core {
 
     public static function default_options(): array {
         return [
+            // ── reCAPTCHA (FREE) ─────────────────────────────────────────────
+            'enable_recaptcha'          => 0,
+            'recaptcha_version'         => 'v3',
+            'recaptcha_site_key'        => '',
+            'recaptcha_secret_key'      => '',
+            'recaptcha_v3_threshold'    => 0.5,
+            'recaptcha_cf7'             => 1,
+            'recaptcha_wpforms'         => 1,
+            'recaptcha_ninjaforms'      => 1,
+            'recaptcha_gravityforms'    => 1,
+            'recaptcha_fluentforms'     => 1,
+            'recaptcha_wp_login'        => 1,
+            'recaptcha_wp_registration' => 1,
+            'recaptcha_wp_lostpassword' => 1,
+            'recaptcha_woo_checkout'    => 0,
+            'recaptcha_generic'         => 1,
             // ── Modules ──────────────────────────────────────────────────────
             'enable_honeypot'         => 1,
             'enable_time_check'       => 1,

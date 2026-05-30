@@ -44,6 +44,7 @@ $opts   = DFSAS_Core::instance()->get_options();
                     'enable_blocklist'       => [__('IP / Email Blocklist',   'dadsfam-antispam'), false],
                     'enable_content_filter'  => [__('Content Filter',         'dadsfam-antispam'), false],
                     'enable_email_validator' => [__('Email Validator',        'dadsfam-antispam'), false],
+                    'enable_recaptcha'       => [__('Google reCAPTCHA',       'dadsfam-antispam'), false],
                     'enable_dnsbl'           => [__('DNSBL IP Reputation',    'dadsfam-antispam'), true ],
                     'enable_geo_block'       => [__('Geo-Blocking',           'dadsfam-antispam'), true ],
                 ];
