@@ -2,7 +2,7 @@
 
 **Pro-grade form & email spam protection.** Honeypots, time checks, IP/email/keyword blocklists, rate limiting, disposable email detection, DNSBL, geo-blocking, and a full spam log — all on your own server. No subscriptions. No data sent anywhere.
 
-**Version:** 1.4.2  
+**Version:** 1.6.0  
 **Author:** DadsFam  
 **Website:** [dadsfam.co.za](https://www.dadsfam.co.za/plugins-dadsfam-co-za/)
 
@@ -76,6 +76,12 @@ Contact us anytime if you need help: **support@dadsfam.co.za**
 ---
 
 ### Changelog
+
+**1.6.0** (2026-05-28)
+- Boot and initialization improvements: license initialization now runs before core modules to ensure Pro filters are registered early
+- Autoloader and class mapping cleanup for clearer file structure
+- Activation and deactivation fixes: spam log table creation and scheduled task cleanup handled reliably
+- Miscellaneous bug fixes and stability improvements
 
 **1.4.2** (2026-05-28)
 - Major fixes for admin emails and wp_mail compatibility (no longer blocked)
