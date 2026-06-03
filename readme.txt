@@ -4,7 +4,7 @@ Tags: anti-spam, spam protection, contact form, honeypot, blocklist
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,6 +62,27 @@ Everything stays on your server in the `{prefix}dfsas_spam_log` table. Nothing i
 Add this filter: `add_filter('dfsas_is_pro', fn() => df_license_is_valid('dadsfam-antispam'));`
 
 == Changelog ==
+
+= 1.6.5 =
+* Production release — removed all debug console.log/warn/error statements
+* Full audit passed: no orphaned comment fragments, no brace mismatches, all autoloaded files verified, uninstall cleanup verified
+
+= 1.6.4 =
+* Fixed: Root cause of missing token found — inline script ran at wp_footer priority 10 BEFORE WordPress prints enqueued scripts at priority 20, so grecaptcha was always undefined. Moved to priority 25 and wrapped in window.addEventListener(load) so Google script is guaranteed loaded before our code runs.
+
+= 1.6.3 =
+* Fixed: Removed duplicate woocommerce_login_form_end hook that injected a second empty token field — PHP takes the last value so token was always blank
+* Fixed: JS now blocks form submit if token is not ready, fetches it first then submits
+* Improved: Console warnings now show if reCAPTCHA script fails to load or execute
+* Improved: Spam log now records Googles specific error code so you can diagnose key/domain issues
+
+= 1.6.2 =
+* Fixed: reCAPTCHA still failing on WooCommerce My Account login — token was being verified twice (single-use tokens always fail on second check). Added WooCommerce nonce detection to skip the wp_authenticate_user check when WooCommerce already verified it.
+
+= 1.6.1 =
+* Fixed: reCAPTCHA v3 failing on wp-admin login — JS ran on wp_footer which does not fire on wp-login.php. Added login_footer hook.
+* Fixed: reCAPTCHA failing on WooCommerce My Account login — field was never injected into that form. Added woocommerce_login_form hook and dedicated verify method.
+* Fixed: v3 token JS now creates the hidden field in any form that does not already have one, not just populates existing ones. Also refreshes token on submit since v3 tokens expire after 2 minutes.
 
 = 1.6.0 =
 * New: Quick Block button on every spam log entry — click the red block icon to instantly add an IP, email, or domain to the blocklist without leaving the page. Duplicate detection included.

@@ -3,7 +3,7 @@
  * Plugin Name:       DadsFam Anti-Spam
  * Plugin URI:        https://dadsfam.co.za/plugins/anti-spam
  * Description:       Pro-grade form & email spam protection. Honeypots, time checks, IP/email/keyword blocklists, rate limiting, disposable email detection, Google reCAPTCHA (v2/v3), DNSBL, geo-blocking, and a full spam log — all on your own server. No subscriptions. No data sent anywhere. Supports Contact Form 7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, Pagelayer, WooCommerce, WordPress Login/Registration, and all generic HTML forms.
- * Version:           1.6.0
+ * Version:           1.6.5
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            DadsFam
@@ -16,7 +16,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'DFSAS_VERSION',  '1.6.0' );
+define( 'DFSAS_VERSION',  '1.6.5' );
 define( 'DFSAS_FILE',     __FILE__ );
 define( 'DFSAS_PATH',     plugin_dir_path( __FILE__ ) );
 define( 'DFSAS_URL',      plugin_dir_url( __FILE__ ) );

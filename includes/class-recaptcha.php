@@ -71,10 +71,14 @@ class DFSAS_ReCaptcha {
             add_filter( 'fluentform/before_insert_submission',           [ $this, 'verify_fluent'  ], 2, 3 );
         }
 
-        // WP Login
+        // WP Login — native wp-login.php AND any theme login form
         if ( ! empty( $this->opts['recaptcha_wp_login'] ) ) {
-            add_action( 'login_form',            [ $this, 'inject_widget_echo' ] );
-            add_filter( 'wp_authenticate_user',  [ $this, 'verify_wp_login'   ], 10, 2 );
+            add_action( 'login_form',           [ $this, 'inject_widget_echo' ] );
+            add_action( 'login_footer',         [ $this, 'inject_generic_js'  ], 25 );
+            add_filter( 'wp_authenticate_user', [ $this, 'verify_wp_login'   ], 10, 2 );
+            // WooCommerce My Account login (front-end form — different from login_form)
+            add_action( 'woocommerce_login_form',           [ $this, 'inject_widget_echo' ] );
+            add_filter( 'woocommerce_process_login_errors', [ $this, 'verify_woo_login'   ], 10, 3 );
         }
 
         // WP Registration
@@ -97,7 +101,8 @@ class DFSAS_ReCaptcha {
 
         // Generic JS injection for all other forms
         if ( ! empty( $this->opts['recaptcha_generic'] ) ) {
-            add_action( 'wp_footer', [ $this, 'inject_generic_js' ] );
+            add_action( 'wp_footer',    [ $this, 'inject_generic_js' ], 25 ); // priority 25 = after wp_print_footer_scripts at 20
+            add_action( 'login_footer', [ $this, 'inject_generic_js' ], 25 );
         }
     }
 
@@ -209,10 +214,34 @@ class DFSAS_ReCaptcha {
         return $insert_data;
     }
 
+    // ─── WooCommerce Login ────────────────────────────────────────────────────
+
+    public function verify_woo_login( WP_Error $errors, string $username, string $password ): WP_Error {
+        if ( $errors->has_errors() ) return $errors;
+        $result = $this->verify_token( $_POST[ $this->token_field_name() ] ?? ( $_POST['g-recaptcha-response'] ?? '' ) );
+        if ( ! $result['success'] ) {
+            DFSAS_Logger::log( [
+                'form_type' => 'woo-login',
+                'ip'        => DFSAS_Helpers::get_client_ip(),
+                'reason'    => 'recaptcha_failed',
+                'details'   => [ 'google_error' => $result['error'] ?? 'unknown', 'token_present' => ! empty( $_POST[ $this->token_field_name() ] ) ? 'yes' : 'no' ],
+                'score'     => 10,
+            ] );
+            $errors->add( 'recaptcha_failed', __( 'reCAPTCHA verification failed. Please try again.', 'dadsfam-antispam' ) );
+        }
+        return $errors;
+    }
+
     // ─── WP Login ─────────────────────────────────────────────────────────────
 
     public function verify_wp_login( $user, string $password ) {
         if ( is_wp_error( $user ) ) return $user;
+
+        // WooCommerce My Account login is verified by verify_woo_login() via
+        // woocommerce_process_login_errors BEFORE wp_authenticate_user fires.
+        // reCAPTCHA tokens are single-use — verifying twice always fails the second time.
+        if ( ! empty( $_POST['woocommerce-login-nonce'] ) ) return $user;
+
         $result = $this->verify_token( $_POST[ $this->token_field_name() ] ?? ( $_POST['g-recaptcha-response'] ?? '' ) );
         if ( ! $result['success'] ) {
             DFSAS_Logger::log( [ 'form_type' => 'wp-login', 'ip' => DFSAS_Helpers::get_client_ip(), 'reason' => 'recaptcha_failed', 'score' => 10 ] );
@@ -256,34 +285,72 @@ class DFSAS_ReCaptcha {
     // ─── Generic JS injection ─────────────────────────────────────────────────
 
     public function inject_generic_js(): void {
-        $key     = esc_attr( $this->site_key );
-        $version = esc_js( $this->version );
-        $field   = esc_js( $this->token_field_name() );
+        $key   = esc_attr( $this->site_key );
+        $field = esc_js( $this->token_field_name() );
         ?>
         <script>
         (function() {
-            if (typeof grecaptcha === 'undefined') return;
-            <?php if ( $this->version === 'v3' ) : ?>
-            // v3: populate hidden token fields on page load
-            grecaptcha.ready(function() {
-                document.querySelectorAll('.dfsas-rc-v3-token').forEach(function(el) {
-                    var action = el.getAttribute('data-action') || 'submit';
-                    grecaptcha.execute('<?php echo $key; ?>', {action: action}).then(function(token) {
-                        el.value = token;
+            var DFSAS_RC_FIELD = '<?php echo $field; ?>';
+            var DFSAS_RC_KEY   = '<?php echo $key; ?>';
+
+            function initRecaptcha() {
+                if (typeof grecaptcha === 'undefined') {
+                    return; // reCAPTCHA script not loaded
+                }
+                <?php if ( $this->version === 'v3' ) : ?>
+                grecaptcha.ready(function() {
+                    document.querySelectorAll('form').forEach(function(form) {
+                        var id = form.getAttribute('id') || '';
+                        if (id === 'adminmenuwrap' || form.closest && form.closest('#adminmenuwrap')) return;
+
+                        var tokenField = form.querySelector('[name="' + DFSAS_RC_FIELD + '"]');
+                        if (!tokenField) {
+                            tokenField = document.createElement('input');
+                            tokenField.type  = 'hidden';
+                            tokenField.name  = DFSAS_RC_FIELD;
+                            form.appendChild(tokenField);
+                        }
+
+                        function fetchToken(cb) {
+                            grecaptcha.execute(DFSAS_RC_KEY, {action: 'submit'})
+                                .then(function(token) {
+                                    tokenField.value = token;
+                                    if (cb) cb();
+                                })
+                                .catch(function() {
+                                    if (cb) cb(); // fail open — don't block the user
+                                });
+                        }
+
+                        fetchToken();
+
+                        form.addEventListener('submit', function(e) {
+                            if (!tokenField.value) {
+                                e.preventDefault();
+                                fetchToken(function() { form.submit(); });
+                            }
+                        }, true);
                     });
                 });
-            });
-            <?php elseif ( $this->version === 'v2_invisible' ) : ?>
-            // v2 invisible: bind to each form's submit
-            document.querySelectorAll('form').forEach(function(form) {
-                var widget = form.querySelector('.g-recaptcha');
-                if (!widget) return;
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    grecaptcha.execute();
+                <?php elseif ( $this->version === 'v2_invisible' ) : ?>
+                document.querySelectorAll('form').forEach(function(form) {
+                    var widget = form.querySelector('.g-recaptcha');
+                    if (!widget) return;
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        grecaptcha.execute();
+                    });
                 });
-            });
-            <?php endif; ?>
+                <?php endif; ?>
+            }
+
+            // window.load fires after ALL scripts (including external Google reCAPTCHA) are loaded
+            // This is critical — our inline script must not run before Google's script initialises
+            if (document.readyState === 'complete') {
+                initRecaptcha();
+            } else {
+                window.addEventListener('load', initRecaptcha);
+            }
         })();
         </script>
         <?php
@@ -313,7 +380,8 @@ class DFSAS_ReCaptcha {
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
 
         if ( empty( $body['success'] ) ) {
-            return [ 'success' => false, 'score' => 0, 'error' => implode( ',', $body['error-codes'] ?? [] ) ];
+            $error_codes = implode( ',', $body['error-codes'] ?? ['unknown'] );
+            return [ 'success' => false, 'score' => 0, 'error' => $error_codes ];
         }
 
         // v3 score check

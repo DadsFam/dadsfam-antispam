@@ -12,6 +12,105 @@
 
             <div class="dfsas-changelog">
 
+                <!-- ── v1.6.5 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.6.5</span>
+                        <span class="dfsas-changelog__date">30 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Production Release</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--improved">Improved</span>
+                            <ul>
+                                <li>Full production audit — removed all debug <code>console.log</code>, <code>console.warn</code>, and <code>console.error</code> statements from all JS and PHP files</li>
+                                <li>Verified: no orphaned PHP comment fragments, no brace mismatches across all 16 class files</li>
+                                <li>Verified: all 16 autoloaded class files exist and are correctly mapped</li>
+                                <li>Verified: all admin views, assets, and uninstall cleanup present and correct</li>
+                                <li>Fail-open on reCAPTCHA network errors — if <code>grecaptcha.execute()</code> fails (network issue, script blocked), the form submits normally rather than blocking the user</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.6.4 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.6.4</span>
+                        <span class="dfsas-changelog__date">30 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li><strong>Root cause of missing reCAPTCHA token found and fixed</strong> — our inline JS ran at <code>wp_footer</code> priority 10, but WordPress prints enqueued scripts (including Google reCAPTCHA) at priority 20. This meant <code>grecaptcha</code> was always <code>undefined</code> when our script ran, hitting the early-exit, and never populating any token field. Fixed by moving to priority 25 (after scripts print) AND wrapping the entire init in <code>window.addEventListener('load')</code> which waits for all external scripts — including Google's — to fully initialise before running.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.6.3 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.6.3</span>
+                        <span class="dfsas-changelog__date">30 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li>Removed <code>woocommerce_login_form_end</code> hook that injected a second empty token field — PHP picks the last value for duplicate field names, so the token was always blank on submit</li>
+                                <li>JS now blocks form submission if the token is not yet ready, fetches it first, then submits — prevents race conditions on slow connections</li>
+                            </ul>
+                        </div>
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--improved">Improved</span>
+                            <ul>
+                                <li>Browser console now shows a clear warning if the reCAPTCHA script fails to load or <code>execute()</code> errors — helps diagnose domain registration and key type issues</li>
+                                <li>Spam log now records Google's specific error code (<code>invalid-input-secret</code>, <code>invalid-input-response</code>, <code>hostname-mismatch</code> etc.) and whether the token was present — open the 🔍 details on a blocked login entry to see why Google rejected it</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.6.2 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.6.2</span>
+                        <span class="dfsas-changelog__date">30 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li><strong>reCAPTCHA still failing on WooCommerce My Account login</strong> — the token was being verified twice. WooCommerce fires <code>woocommerce_process_login_errors</code> first (our <code>verify_woo_login</code>), consuming the token, then calls <code>wp_signon()</code> which triggers <code>wp_authenticate_user</code> (our <code>verify_wp_login</code>) and tries to verify the now-spent token — which always fails. Fixed by detecting the WooCommerce login nonce and skipping the <code>wp_authenticate_user</code> check when WooCommerce has already handled it.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.6.1 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.6.1</span>
+                        <span class="dfsas-changelog__date">30 May 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li><strong>reCAPTCHA failing on wp-admin login</strong> — the v3 token JS was hooked to <code>wp_footer</code> which does not fire on the native <code>wp-login.php</code> page. Added <code>login_footer</code> hook so the token is generated and injected before the form is submitted.</li>
+                                <li><strong>reCAPTCHA failing on WooCommerce My Account login</strong> — the token field was only injected via the <code>login_form</code> action (native WP login), not <code>woocommerce_login_form</code>. Added dedicated WooCommerce login injection and a <code>woocommerce_process_login_errors</code> verify method.</li>
+                                <li><strong>v3 token JS now creates the hidden field itself</strong> — previously it only populated existing <code>.dfsas-rc-v3-token</code> elements. Now it creates the field in any form that does not already have one, making it work for WooCommerce and any other front-end form. Token is also refreshed on form submit since v3 tokens expire after 2 minutes.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ── v1.6.0 ──────────────────────────────────────────────── -->
                 <div class="dfsas-changelog__version">
                     <div class="dfsas-changelog__header">
