@@ -1,8 +1,9 @@
 # DadsFam Anti-Spam
 
-**Pro-grade form & email spam protection.** Honeypots, time checks, IP/email/keyword blocklists, rate limiting, disposable email detection, DNSBL, geo-blocking, and a full spam log — all on your own server. No subscriptions. No data sent anywhere.
+**Pro-grade form & email spam protection.**  
+Honeypots, time checks, rate limiting, IP/email/keyword blocklists, content scoring, disposable email detection, DNSBL, geo-blocking, and a full spam log — all running on **your own server**. No subscriptions. No data sent anywhere.
 
-**Version:** 1.6.0  
+**Version:** 1.6.5  
 **Author:** DadsFam  
 **Website:** [dadsfam.co.za](https://www.dadsfam.co.za/plugins-dadsfam-co-za/)
 
@@ -11,95 +12,89 @@
 ### Features
 
 #### ✅ Free Features
-- 🍯 Honeypot Trap (works with CF7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms + generic forms)
-- ⏱️ Time-Based Check (blocks super-fast bot submissions)
-- 🚦 Rate Limiter (per-IP throttling with lockout)
-- 🚫 IP / Email / Domain / Keyword Blocklist
-- 📊 Content Filter (scoring engine for spam patterns)
-- ✉️ Email Validator (MX check + disposable domains)
-- 📋 Spam Log (last 200 blocked attempts with reason & score)
+- 🍯 **Honeypot Trap** – Works with Contact Form 7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, Pagelayer & generic forms
+- ⏱️ **Time-Based Check** – Blocks bots that submit too quickly
+- 🚦 **Rate Limiter** – Per-IP throttling with configurable lockout
+- 🚫 **IP / Email / Domain / Keyword Blocklist**
+- 📊 **Content Filter** – Smart scoring engine (links, HTML, spam phrases, suspicious TLDs)
+- ✉️ **Email Validator** – MX record check + disposable email detection
+- 📋 **Spam Log** – View last 200 blocked submissions with reason and score
 
 #### ⭐ Pro Features (License Key)
-- 🌐 DNSBL IP Reputation checks (Spamhaus, SpamCop, etc.)
-- 🗺️ Geo-Blocking (block entire countries)
-- 📧 1,500+ Disposable Email Domains
-- ♾️ Unlimited Blocklist Entries + CIDR/Wildcard support
-- ✅ Whitelist (always allow specific IPs/emails)
-- 📊 CSV Log Export
-- 📬 Email Digest (daily/weekly summary)
-- 🧹 Auto Log Cleanup
-- Full DF Licensing integration
+- 🌐 **DNSBL IP Reputation** – Real-time checks (Spamhaus, SpamCop, SORBS, etc.)
+- 🗺️ **Geo-Blocking** – Block entire countries
+- 📧 **1,500+ Disposable Email Domains**
+- ♾️ **Unlimited Blocklist Entries** + CIDR & Wildcard support
+- ✅ **Whitelist** – Always allow specific IPs and emails
+- 📊 **CSV Log Export**
+- 📬 **Email Digest** – Daily or weekly summary
+- 🧹 **Auto Log Cleanup**
+- 🔑 Full DadsFam Licensing integration
 
 ---
 
 ### Installation
+
 1. Download the latest release from this repository
 2. Upload the `dadsfam-antispam` folder to `/wp-content/plugins/`
 3. Activate **DadsFam Anti-Spam** in WordPress
-4. Go to **Anti-Spam → Settings** to configure protection level
+4. Go to **Anti-Spam → Settings** to configure
 
 ### Quick Start
-1. Activate the plugin
-2. The honeypot and basic protections start working immediately
-3. Visit **Anti-Spam → Settings** to fine-tune time checks, rate limits, and blocklists
-4. Check the **Spam Log** to see what’s being blocked
+
+1. Activate the plugin — basic protection (honeypot + time check) works immediately
+2. Visit **Anti-Spam → Settings** to enable additional protections
+3. Monitor blocked attempts in **Anti-Spam → Spam Log**
 
 ---
 
 ### ❤️ A Note from the Developer
-This plugin is and will always remain **100% FREE** for personal and commercial use (core features).
 
-I built it for fun — a Dad from South Africa just trying to make ends meet. Yes, we know AI is advanced and there are bigger plugins out there. I do this because I love it.
+This plugin is and will always remain **100% FREE** for core features.
 
-If you really like what I do and it helps your business, please consider purchasing a **Pro License Key**. It’s purely a donation/support that helps put food on the table and lets me keep building awesome free plugins for the WordPress community.
+I’m a Dad from South Africa building tools that help small businesses. If this plugin saves you time and reduces spam headaches, consider buying a **Pro License**. It’s not just a key — it’s real support that helps me keep developing quality free plugins for the WordPress community.
 
-Thank you for understanding ❤️  
+Thank you for your support ❤️  
 Love from South Africa 🇿🇦
 
 ### 🌐 Connect With Us
-- **Website**: [www.dadsfam.co.za](https://www.dadsfam.co.za/plugins-dadsfam-co-za/)
-- **Threads**: [@dadsfamshop](https://www.threads.com/@dadsfamshop)
-- **WhatsApp Community**: [Join here](https://chat.whatsapp.com/IQUhr0zoiO42Y9pXgLMQQz)
-- **Instagram**: [@dadsfamshop](https://www.instagram.com/dadsfamshop/)
+- **Website**: [dadsfam.co.za](https://www.dadsfam.co.za/plugins-dadsfam-co-za/)
+- **Support**: support@dadsfam.co.za
 - **X / Twitter**: [@DADSFAM](https://x.com/DADSFAM)
-- **WordPress Plugins**: [Browse all plugins](https://www.dadsfam.co.za/plugins-dadsfam-co-za/)
+- **Instagram**: [@dadsfamshop](https://www.instagram.com/dadsfamshop/)
 - **GitHub**: [DadsFam](https://github.com/DadsFam)
-
-### 📢 WordPress.org Submission
-We are actively submitting all our plugins to the official [WordPress.org Plugin Directory](https://wordpress.org/plugins/).  
-
-Contact us anytime if you need help: **support@dadsfam.co.za**
-
-### Known Issues
-- None currently.
 
 ---
 
 ### Changelog
 
-**1.6.0** (2026-05-28)
-- Boot and initialization improvements: license initialization now runs before core modules to ensure Pro filters are registered early
-- Autoloader and class mapping cleanup for clearer file structure
-- Activation and deactivation fixes: spam log table creation and scheduled task cleanup handled reliably
-- Miscellaneous bug fixes and stability improvements
+**1.6.5** (2026-06-03)
+- Production release — removed all debug `console.log`, `console.warn`, and `console.error` statements
+- Full code audit completed: fixed orphaned comment fragments, brace mismatches, and autoloader issues
+- Improved `uninstall.php` cleanup
+- Updated plugin headers and readme files
+- General stability improvements
 
-**1.4.2** (2026-05-28)
-- Major fixes for admin emails and wp_mail compatibility (no longer blocked)
-- Improved whitelist handling (now works properly with rate limiter on free tier)
-- Fixed permanent saving of whitelisted IPs
-- Multiple bug fixes and stability improvements
+**1.6.4**
+- Fixed reCAPTCHA v3 token loading issue (script timing)
 
-**1.4.1**
-- Fixed Upload & Import button not working
+**1.6.3**
+- Fixed duplicate WooCommerce login hook causing blank reCAPTCHA token
+- Improved reCAPTCHA error handling and logging
 
-**1.4.0**
-- New (PRO): Upload domain list directly from browser
+**1.6.2**
+- Fixed reCAPTCHA double verification on WooCommerce My Account login
 
-**1.3.x - 1.2.x**
-- Full PRO licensing system, UI improvements, blocklist fixes
+**1.6.1**
+- Added proper reCAPTCHA support for wp-login.php and WooCommerce My Account
 
-**1.0.0**
-- Initial release
+**1.6.0**
+- New: Quick Block button in spam log
+- New: Expandable log details with full score breakdown
+- New: Statistics bar (total, today, this week, top IP)
+
+**Older versions**
+- See [changelog.txt](changelog.txt) for full history
 
 ---
 
@@ -108,4 +103,4 @@ GPLv2 or later
 
 ---
 
-Made with ❤️ by [DadsFam](https://www.dadsfam.co.za/plugins-dadsfam-co-za/) - South African Dad building tools for busy store owners
+Made with ❤️ by [DadsFam](https://www.dadsfam.co.za/) — A South African Dad building tools for busy store owners.
