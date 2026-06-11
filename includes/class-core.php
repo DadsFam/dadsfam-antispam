@@ -56,6 +56,8 @@ class DFSAS_Core {
         if ( $opts['enable_email_validator'] ) new DFSAS_EmailValidator( $opts );
         // reCAPTCHA — FREE, boots if keys are configured
         if ( $opts['enable_recaptcha'] )       new DFSAS_ReCaptcha( $opts );
+        // Comment spam protection — FREE
+        if ( $opts['enable_comments'] )        new DFSAS_Comments( $opts );
         // Pagelayer / Softaculous form builder
         new DFSAS_Pagelayer( $opts );
 
@@ -169,6 +171,7 @@ class DFSAS_Core {
             'enable_blocklist'        => 1,
             'enable_content_filter'   => 1,
             'enable_email_validator'  => 1,
+            'enable_comments'         => 1,  // comment spam protection
             'enable_dnsbl'            => 0,  // PRO
             'enable_geo_block'        => 0,  // PRO
             'enable_log_cleanup'      => 0,  // PRO

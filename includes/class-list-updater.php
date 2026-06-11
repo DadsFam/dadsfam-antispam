@@ -45,11 +45,61 @@ class DFSAS_ListUpdater {
     // ─── Scheduling ───────────────────────────────────────────────────────────
 
     private function schedule(): void {
+        // Register custom intervals on EVERY request so WP-Cron always knows about them
+        add_filter( 'cron_schedules', [ self::class, 'add_cron_intervals' ] );
+
+        // Register the cron callback
         add_action( self::CRON_HOOK, [ $this, 'run_update' ] );
 
-        if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
-            wp_schedule_event( time(), 'weekly', self::CRON_HOOK );
+        // Reschedule IMMEDIATELY when settings are saved — no page reload needed
+        add_action( 'update_option_dfsas_options', [ self::class, 'reschedule_on_save' ], 10, 2 );
+
+        // Initial schedule if nothing is set yet
+        $opts      = get_option( 'dfsas_options', [] );
+        $frequency = $opts['domain_list_frequency'] ?? 'weekly';
+        $enabled   = ! empty( $opts['enable_auto_update'] );
+
+        if ( $enabled && ! wp_next_scheduled( self::CRON_HOOK ) ) {
+            wp_schedule_event( time(), $frequency, self::CRON_HOOK );
+        } elseif ( ! $enabled ) {
+            wp_clear_scheduled_hook( self::CRON_HOOK );
         }
+    }
+
+    /**
+     * Fires the moment dfsas_options is saved.
+     * Clears and reschedules with the new frequency immediately.
+     */
+    public static function reschedule_on_save( $old_value, $new_value ): void {
+        $new_freq    = $new_value['domain_list_frequency'] ?? 'weekly';
+        $old_freq    = $old_value['domain_list_frequency'] ?? 'weekly';
+        $new_enabled = ! empty( $new_value['enable_auto_update'] );
+        $old_enabled = ! empty( $old_value['enable_auto_update'] );
+
+        // Only act if something changed
+        if ( $new_freq === $old_freq && $new_enabled === $old_enabled ) return;
+
+        // Clear all existing instances cleanly
+        wp_clear_scheduled_hook( self::CRON_HOOK );
+
+        // Reschedule with new frequency if still enabled
+        if ( $new_enabled ) {
+            wp_schedule_event( time(), $new_freq, self::CRON_HOOK );
+        }
+    }
+
+    public static function add_cron_intervals( array $schedules ): array {
+        $custom = [
+            'every_6_hours'  => [ 'interval' => 6  * HOUR_IN_SECONDS, 'display' => 'Every 6 Hours'  ],
+            'every_12_hours' => [ 'interval' => 12 * HOUR_IN_SECONDS, 'display' => 'Every 12 Hours' ],
+            'every_3_days'   => [ 'interval' => 3  * DAY_IN_SECONDS,  'display' => 'Every 3 Days'   ],
+        ];
+        foreach ( $custom as $key => $val ) {
+            if ( ! isset( $schedules[ $key ] ) ) {
+                $schedules[ $key ] = $val;
+            }
+        }
+        return $schedules;
     }
 
     public static function unschedule(): void {

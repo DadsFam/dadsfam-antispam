@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       DadsFam Anti-Spam
  * Plugin URI:        https://dadsfam.co.za/plugins/anti-spam
- * Description:       Pro-grade form & email spam protection. Honeypots, time checks, IP/email/keyword blocklists, rate limiting, disposable email detection, Google reCAPTCHA (v2/v3), DNSBL, geo-blocking, and a full spam log — all on your own server. No subscriptions. No data sent anywhere. Supports Contact Form 7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, Pagelayer, WooCommerce, WordPress Login/Registration, and all generic HTML forms.
- * Version:           1.6.5
+ * Description:       Pro-grade spam protection for WordPress. Covers contact forms, comment forms, user registrations, logins, and WooCommerce — all in one plugin. Honeypots, time checks, IP/email/keyword blocklists, rate limiting, disposable email detection, Google reCAPTCHA (v2/v3), DNSBL, geo-blocking, comment spam scoring, and a full spam log. No subscriptions. No data sent anywhere. Supports Contact Form 7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, Pagelayer, WooCommerce, WordPress Login/Registration, WordPress Comments, and all generic HTML forms.
+ * Version:           1.8.3
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            DadsFam
@@ -16,7 +16,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'DFSAS_VERSION',  '1.6.5' );
+define( 'DFSAS_VERSION',  '1.8.3' );
 define( 'DFSAS_FILE',     __FILE__ );
 define( 'DFSAS_PATH',     plugin_dir_path( __FILE__ ) );
 define( 'DFSAS_URL',      plugin_dir_url( __FILE__ ) );
@@ -35,6 +35,7 @@ spl_autoload_register( static function ( string $class ): void {
         'DFSAS_GeoBlock'       => 'includes/class-geo-block.php',
         'DFSAS_Logger'         => 'includes/class-logger.php',
         'DFSAS_Helpers'        => 'includes/class-helpers.php',
+        'DFSAS_Comments'       => 'includes/class-comments.php',
         'DFSAS_Pagelayer'      => 'includes/class-pagelayer.php',
         'DFSAS_ReCaptcha'      => 'includes/class-recaptcha.php',
         'DFSAS_License'        => 'includes/class-license.php',

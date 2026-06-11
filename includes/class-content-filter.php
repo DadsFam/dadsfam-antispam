@@ -186,7 +186,8 @@ class DFSAS_ContentFilter {
                 'score'     => $result['score'],
                 'details'   => $result['reasons'],
             ] );
-            $atts['to'] = 'blocked@localhost';
+            // Log only — wp_mail is too broad to block safely.
+            // Form-specific hooks (CF7, WPForms etc.) handle actual blocking.
         }
         return $atts;
     }

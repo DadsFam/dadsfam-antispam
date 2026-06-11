@@ -117,6 +117,7 @@ class DFSAS_Admin {
             'enable_honeypot','enable_time_check','enable_rate_limiter','enable_blocklist',
             'enable_content_filter','enable_email_validator','enable_dnsbl','enable_geo_block',
             'enable_log_cleanup','enable_email_digest', 'enable_auto_update', 'enable_recaptcha',
+            'enable_comments',
             'honeypot_cf7','honeypot_wpforms','honeypot_ninjaforms','honeypot_gravityforms',
             'honeypot_fluentforms','honeypot_generic',
             'block_disposable_emails','check_mx_records','block_html_in_message','log_blocked',
@@ -160,9 +161,11 @@ class DFSAS_Admin {
         if ( isset( $raw['domain_list_url'] ) )
             $clean['domain_list_url'] = esc_url_raw( $raw['domain_list_url'] );
 
-        if ( isset( $raw['domain_list_frequency'] ) )
-            $clean['domain_list_frequency'] = in_array( $raw['domain_list_frequency'], [ 'daily', 'weekly' ], true )
+        if ( isset( $raw['domain_list_frequency'] ) ) {
+            $valid_frequencies = [ 'hourly', 'every_6_hours', 'every_12_hours', 'twicedaily', 'daily', 'every_3_days', 'weekly' ];
+            $clean['domain_list_frequency'] = in_array( $raw['domain_list_frequency'], $valid_frequencies, true )
                 ? $raw['domain_list_frequency'] : 'weekly';
+        }
 
         // reCAPTCHA
         if ( isset( $raw['recaptcha_version'] ) )

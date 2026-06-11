@@ -27,6 +27,7 @@ $is_pro = DFSAS_Helpers::is_pro();
                         'enable_blocklist'       => [__('IP / Email Blocklist','dadsfam-antispam'),   __('Block specific IPs (supports CIDR/wildcard), emails, domains, and keywords.','dadsfam-antispam'), false],
                         'enable_content_filter'  => [__('Content Filter','dadsfam-antispam'),         __('Scoring engine: detects excessive links, HTML injection, spam phrases, and more.','dadsfam-antispam'), false],
                         'enable_email_validator' => [__('Email Validator','dadsfam-antispam'),        __('Checks MX records and blocks disposable/throwaway email addresses.','dadsfam-antispam'), false],
+                        'enable_comments'        => [__('Comment Protection','dadsfam-antispam'),      __('Honeypot, time check, rate limiting, blocklist and content scoring on WordPress comment forms.','dadsfam-antispam'), false],
                         'enable_dnsbl'           => [__('DNSBL IP Reputation','dadsfam-antispam'),    __('Checks the submitter\'s IP against real-time DNS blacklists (Spamhaus, SpamCop, SORBS).','dadsfam-antispam'), true],
                         'enable_geo_block'       => [__('Geo-Blocking','dadsfam-antispam'),           __('Block form submissions from specific countries by ISO code.','dadsfam-antispam'), true],
                     ];
@@ -252,7 +253,7 @@ $is_pro = DFSAS_Helpers::is_pro();
 
                 <div class="dfsas-field-row" style="margin-top:14px">
                     <label class="dfsas-toggle"><input type="checkbox" name="dfsas_options[enable_auto_update]" value="1" <?php checked(!empty($opts['enable_auto_update'])); disabled(!$is_pro); ?> /><span class="dfsas-toggle__slider"></span></label>
-                    <div class="dfsas-setting__text"><strong><?php esc_html_e('Enable automatic weekly update','dadsfam-antispam'); ?></strong></div>
+                    <div class="dfsas-setting__text"><strong><?php esc_html_e('Enable Automatic Updates','dadsfam-antispam'); ?></strong></div>
                 </div>
 
                 <div class="dfsas-field-row">
@@ -262,11 +263,17 @@ $is_pro = DFSAS_Helpers::is_pro();
                 </div>
 
                 <div class="dfsas-field-row">
-                    <label><?php esc_html_e('Update frequency','dadsfam-antispam'); ?></label>
+                    <label><?php esc_html_e('Auto-update frequency','dadsfam-antispam'); ?></label>
                     <select name="dfsas_options[domain_list_frequency]" <?php disabled(!$is_pro); ?>>
-                        <option value="daily"  <?php selected($opts['domain_list_frequency'] ?? 'weekly','daily');  ?>><?php esc_html_e('Daily','dadsfam-antispam'); ?></option>
-                        <option value="weekly" <?php selected($opts['domain_list_frequency'] ?? 'weekly','weekly'); ?>><?php esc_html_e('Weekly (recommended)','dadsfam-antispam'); ?></option>
+                        <option value="hourly"        <?php selected($opts['domain_list_frequency']??'weekly','hourly');        ?>><?php esc_html_e('Every Hour',    'dadsfam-antispam'); ?></option>
+                        <option value="every_6_hours" <?php selected($opts['domain_list_frequency']??'weekly','every_6_hours'); ?>><?php esc_html_e('Every 6 Hours', 'dadsfam-antispam'); ?></option>
+                        <option value="every_12_hours"<?php selected($opts['domain_list_frequency']??'weekly','every_12_hours');?>><?php esc_html_e('Every 12 Hours','dadsfam-antispam'); ?></option>
+                        <option value="twicedaily"    <?php selected($opts['domain_list_frequency']??'weekly','twicedaily');    ?>><?php esc_html_e('Twice Daily',   'dadsfam-antispam'); ?></option>
+                        <option value="daily"         <?php selected($opts['domain_list_frequency']??'weekly','daily');         ?>><?php esc_html_e('Daily',          'dadsfam-antispam'); ?></option>
+                        <option value="every_3_days"  <?php selected($opts['domain_list_frequency']??'weekly','every_3_days');  ?>><?php esc_html_e('Every 3 Days',  'dadsfam-antispam'); ?></option>
+                        <option value="weekly"        <?php selected($opts['domain_list_frequency']??'weekly','weekly');        ?>><?php esc_html_e('Weekly (recommended)','dadsfam-antispam'); ?></option>
                     </select>
+                    <span class="dfsas-hint"><?php esc_html_e('Weekly is recommended — the disposable domain list rarely changes more than once a week.','dadsfam-antispam'); ?></span>
                 </div>
 
                 <div class="dfsas-notice dfsas-notice--info dfsas-notice--sm" style="margin-top:8px">
@@ -277,10 +284,12 @@ $is_pro = DFSAS_Helpers::is_pro();
                     ); ?>
                 </div>
 
+                <div style="border-top:1px solid var(--df-gray-2);margin:16px 0"></div>
+
                 <!-- ── Upload button ── -->
-                <div class="dfsas-upload-box" style="margin-top:16px">
+                <div class="dfsas-upload-box">
                     <p class="dfsas-card__desc" style="margin-bottom:8px">
-                        <strong><?php esc_html_e('Or just upload a .txt file directly — no FTP or cPanel needed:','dadsfam-antispam'); ?></strong>
+                        <strong><?php esc_html_e('Or upload a custom .txt file — no FTP or cPanel needed:','dadsfam-antispam'); ?></strong>
                     </p>
                     <div class="dfsas-upload-row">
                         <label class="dfsas-btn dfsas-btn--secondary dfsas-btn--sm" for="dfsas-file-input" style="cursor:pointer">
@@ -367,6 +376,22 @@ $is_pro = DFSAS_Helpers::is_pro();
                     <span id="dfsas-recaptcha-test-msg" style="font-size:13px;margin-left:10px"></span>
                 </div>
                 <?php endif; ?>
+            </div>
+
+            <!-- ── Comment Spam Protection ───────────────────────────────── -->
+            <div class="dfsas-card">
+                <h2 class="dfsas-card__title">💬 <?php esc_html_e('Comment Spam Protection','dadsfam-antispam'); ?> <span class="dfsas-badge" style="background:#1a8a4a;color:#fff">FREE</span></h2>
+                <p class="dfsas-card__desc"><?php esc_html_e('Protects WordPress comment forms from bots and spammers. Uses the same honeypot, time check, rate limiting, blocklist, and content scoring as the rest of the plugin. Trackbacks, pingbacks, and logged-in moderators are always skipped.','dadsfam-antispam'); ?></p>
+                <div class="dfsas-setting-row">
+                    <label class="dfsas-toggle"><input type="checkbox" name="dfsas_options[enable_comments]" value="1" <?php checked(!empty($opts['enable_comments'])); ?> /><span class="dfsas-toggle__slider"></span></label>
+                    <div class="dfsas-setting__text">
+                        <strong><?php esc_html_e('Enable Comment Spam Protection','dadsfam-antispam'); ?></strong>
+                        <p><?php esc_html_e('Honeypot + time check hard-block bots. Content scoring sends suspicious comments to your spam queue (not deleted — you can review them). Blocklisted IPs/emails/keywords are blocked outright.','dadsfam-antispam'); ?></p>
+                    </div>
+                </div>
+                <div class="dfsas-notice dfsas-notice--info dfsas-notice--sm" style="margin-top:8px">
+                    💡 <?php esc_html_e('Content scoring uses the same threshold from Content Filter settings above. Spam comments go to Comments → Spam in your dashboard for review, not deleted permanently.','dadsfam-antispam'); ?>
+                </div>
             </div>
 
             <!-- ── Logging ────────────────────────────────────────────────── -->

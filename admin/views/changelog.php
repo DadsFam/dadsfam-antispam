@@ -12,6 +12,92 @@
 
             <div class="dfsas-changelog">
 
+                <!-- ── v1.8.2 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.8.2</span>
+                        <span class="dfsas-changelog__date">5 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li><strong>Auto-update frequency change had no effect</strong> — the reschedule logic only ran on page load and compared against a separately stored option that often didn't match. Replaced with a direct <code>update_option_dfsas_options</code> action hook so WP-Cron is rescheduled the instant you click Save — no page reload, no delay.</li>
+                                <li>Replaced <code>wp_unschedule_event()</code> with <code>wp_clear_scheduled_hook()</code> which reliably removes all instances of a recurring event, not just the next one.</li>
+                            </ul>
+                        </div>
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--improved">Improved</span>
+                            <ul>
+                                <li>Label updated from "Enable automatic weekly update" to "Enable Automatic Updates" — reflects that the frequency is now configurable, not always weekly.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.8.1 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.8.1</span>
+                        <span class="dfsas-changelog__date">5 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--improved">Improved</span>
+                            <ul>
+                                <li>Settings and changelog cleaned up — removed an internal admin tool not intended for public distribution</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.8.0 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.8.0</span>
+                        <span class="dfsas-changelog__date">5 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Feature Update</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--new">New</span>
+                            <ul>
+                                <li><strong>💬 Comment Spam Protection (FREE)</strong> — full protection on all WordPress comment forms, no separate plugin needed:
+                                    <ul style="margin-top:6px">
+                                        <li><strong>Honeypot trap</strong> — invisible field injected into comment form. Bots fill it; humans never see it. Hard-blocked immediately.</li>
+                                        <li><strong>Time check</strong> — bots submit in milliseconds. Submissions under the minimum time are hard-blocked.</li>
+                                        <li><strong>Rate limiting</strong> — same per-IP throttle as contact forms. Repeat offenders get locked out.</li>
+                                        <li><strong>Blocklist</strong> — IPs, emails, domains, and keywords checked against your blocklist. Hard-blocked.</li>
+                                        <li><strong>Content scoring</strong> — excessive links, HTML injection, repeated characters, suspicious URLs, disposable emails, keyword matches. Scores above threshold go to your <em>Comments → Spam</em> queue for review — not deleted permanently.</li>
+                                    </ul>
+                                </li>
+                                <li>Trackbacks, pingbacks, and logged-in users with <code>moderate_comments</code> capability are always skipped</li>
+                                <li>Comment protection toggle in Settings → Protection Modules and its own dedicated settings card</li>
+                                <li>Blocked/flagged comments logged to Spam Log with form type "comment"</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.7.1 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.7.1</span>
+                        <span class="dfsas-changelog__date">4 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Feature Update</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--new">New</span>
+                            <ul>
+                                <li><strong>Extended auto-update frequency options</strong> — the domain list schedule now supports: Every Hour, Every 6 Hours, Every 12 Hours, Twice Daily, Daily, Every 3 Days, Weekly. Changing the frequency and saving settings reschedules the cron immediately. Weekly remains the default and recommended setting since the GitHub community list rarely changes more often.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ── v1.6.5 ──────────────────────────────────────────────── -->
                 <div class="dfsas-changelog__version">
                     <div class="dfsas-changelog__header">

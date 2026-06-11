@@ -1,159 +1,140 @@
 === DadsFam Anti-Spam ===
 Contributors: dadsfam
-Tags: anti-spam, spam protection, contact form, honeypot, blocklist
+Tags: anti-spam, spam protection, contact form, honeypot, recaptcha, comment spam, blocklist
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.6.5
+Stable tag: 1.8.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Pro-grade form & email spam protection. Honeypots, time checks, rate limiting, blocklists, content scoring, DNSBL, geo-blocking — all on your server.
+Pro-grade spam protection for WordPress — contact forms, comments, logins, registrations, and WooCommerce, all in one plugin. No subscriptions.
 
 == Description ==
 
-**DadsFam Anti-Spam** stops contact-form spam before it hits your inbox. Every check runs locally — no data is sent to any third-party service.
+**DadsFam Anti-Spam** stops spam across your entire WordPress site. Every check runs locally — no data is sent to any third-party service.
+
+**What it protects:**
+
+* 📝 Contact forms — CF7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, Pagelayer, and any generic HTML form
+* 💬 WordPress comment forms — honeypot, time check, content scoring, blocklist
+* 🔐 WordPress login and registration
+* 🔑 WooCommerce My Account login and checkout
+* 🔄 Lost password form
+* 🌐 Any other HTML form on your site via JavaScript injection
 
 **Free Features**
 
-* 🍯 **Honeypot Trap** — invisible fields injected into CF7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, and all generic forms via JS
-* ⏱️ **Time-Based Check** — blocks bots that submit in under N seconds
-* 🚦 **Rate Limiter** — per-IP submission throttling with configurable lockout
-* 🚫 **IP / Email / Domain / Keyword Blocklist** — manual block rules (up to 100 IPs, 100 emails/domains, 50 keywords on Free)
-* 📊 **Content Filter** — scoring engine: excessive links, HTML injection, spam phrases, suspicious TLDs
-* ✉️ **Email Validator** — MX record check + 50 known disposable email domains
-* 📋 **Spam Log** — last 200 blocked submissions with reason, score, and IP
+* 🍯 Honeypot trap — invisible fields injected into all forms. Bots fill them; humans never see them
+* ⏱️ Time-based check — blocks submissions under your minimum seconds threshold
+* 🚦 Rate limiter — per-IP throttle with configurable window and lockout
+* 🚫 IP / email / domain / keyword blocklist — manual block rules (up to 100 IPs, 100 emails/domains, 50 keywords on Free)
+* 📊 Content filter scoring — excessive links, HTML injection, spam phrases, suspicious TLDs
+* ✉️ Email validator — MX record check + 50 built-in disposable email domains
+* 💬 Comment spam protection — honeypot, time check, rate limiting, blocklist, and content scoring on comment forms. Bot submissions hard-blocked; suspicious comments go to spam queue
+* 🔑 Google reCAPTCHA v2 / v2 Invisible / v3 — all versions, all major form plugins
+* 🐙 Pull from GitHub — one-click update of disposable email domain list from the community repository
+* 📋 Spam log — last 200 blocked submissions with Quick Block (add IP/email/domain to blocklist in one click) and expandable details
+* 🔌 DF Licensing integration hook ready
 
 **PRO Features**
 
-* 🌐 **DNSBL IP Reputation** — real-time check against Spamhaus, SpamCop, SORBS
-* 🗺️ **Geo-Blocking** — block entire countries by ISO code
-* 📧 **1 500+ Disposable Email Domains** — extended throwaway-email database
-* ♾️ **Unlimited Blocklist Entries** — no Free-tier caps
-* 🔀 **CIDR & Wildcard IP Blocking** — block IP ranges
-* ✅ **Whitelist** — always-allow specific IPs and emails
-* 📊 **CSV Log Export**
-* 📬 **Email Digest** — daily or weekly spam summary
-* 🧹 **Auto Log Cleanup** — delete logs older than N days
-* 🔑 **DF Licensing integration** — hooks straight into your DadsFam License plugin
+* 🌐 DNSBL IP reputation — real-time check against Spamhaus, SpamCop, SORBS
+* 🗺️ Geo-blocking — block by country ISO code
+* 📧 1 500+ disposable email domains — extended database with auto-update
+* ♾️ Unlimited blocklist entries — no Free-tier caps
+* 🔀 CIDR & wildcard IP blocking — e.g. 192.168.1.0/24 or 10.0.0.*
+* ✅ Whitelist — always-allow specific IPs and emails
+* 📊 CSV log export
+* 📬 Email digest — daily or weekly spam summary
+* 🧹 Auto log cleanup — delete entries older than N days
 
-**Supported Form Plugins & Integrations**
+**Supported Integrations**
 
-Contact Form 7 · WPForms · Ninja Forms · Gravity Forms · Fluent Forms · Pagelayer (Softaculous) · WooCommerce Checkout · WordPress Login · WordPress Registration · WordPress Lost Password · Any generic HTML form (JS injection)
+Contact Form 7 · WPForms · Ninja Forms · Gravity Forms · Fluent Forms · Pagelayer (Softaculous) · WooCommerce Checkout · WooCommerce My Account Login · WordPress Login · WordPress Registration · WordPress Lost Password · WordPress Comments · Any generic HTML form (JS injection)
 
 == Installation ==
 
 1. Upload the `dadsfam-antispam` folder to `/wp-content/plugins/`
 2. Activate via **Plugins → Installed Plugins**
-3. Go to **Anti-Spam → Settings** to configure
+3. Go to **Anti-Spam → Settings** — all core modules are ON by default
+4. That's it. Your forms, comments, and logins are protected immediately.
 
 == Frequently Asked Questions ==
 
-= Does this affect site performance? =
-No. All checks use fast PHP logic and WordPress transients. The DNSBL module does one DNS lookup per unique IP per request (cached).
+= Does this replace Akismet? =
+Yes. The comment protection covers everything Akismet does plus adds honeypot, time check, rate limiting, and blocklist checks on top.
 
-= Will it break my contact forms? =
-No. It hooks into each form plugin's validation API — forms are not modified other than the invisible honeypot fields.
+= Does it affect site performance? =
+No. All checks use fast PHP logic and WordPress transients. No external calls except DNSBL (PRO) and reCAPTCHA (optional).
+
+= Does it filter incoming emails to my mailbox? =
+No — no WordPress plugin can do this. Incoming email filtering (SpamAssassin etc.) is done at the mail server level via cPanel. This plugin protects spam generated through your site.
 
 = Where is my data stored? =
-Everything stays on your server in the `{prefix}dfsas_spam_log` table. Nothing is sent externally.
+Everything stays on your server in the `{prefix}dfsas_spam_log` table. Nothing is sent externally except reCAPTCHA verification (to Google) and DNSBL lookups (to DNS servers) if those features are enabled.
 
-= How do I integrate my DF Licensing plugin later? =
-Add this filter: `add_filter('dfsas_is_pro', fn() => df_license_is_valid('dadsfam-antispam'));`
+= How do I integrate with DF Licensing? =
+Add: `add_filter('dfsas_is_pro', fn() => df_license_is_valid('dadsfam-antispam'));`
 
 == Changelog ==
 
+= 1.8.3 =
+* Fixed: wp_mail content and blocklist filters were diverting legitimate contact form emails (including Gmail addresses) to blocked@localhost. These filters now LOG suspicious mail only — never block. Blocking is handled exclusively by form-specific hooks (CF7, WPForms etc.) which are targeted and reliable.
+
+= 1.8.2 =
+* Fixed: Auto-update frequency change had no effect — rescheduling now fires immediately when settings are saved via update_option hook, no page reload needed
+* Fixed: wp_clear_scheduled_hook() used instead of wp_unschedule_event() for reliable clearing of all instances
+* Improved: Label changed from "Enable automatic weekly update" to "Enable Automatic Updates"
+
+= 1.8.1 =
+* Removed: Internal admin tool not intended for public distribution
+* Improved: Settings and changelog cleaned up accordingly
+
+= 1.8.0 =
+* New (FREE): Full comment spam protection — honeypot, time check, rate limiting, blocklist, content scoring on all WordPress comment forms
+
+= 1.7.1 =
+* New: Extended auto-update frequency — Every Hour, 6 Hours, 12 Hours, Twice Daily, Daily, Every 3 Days, Weekly
+
 = 1.6.5 =
-* Production release — removed all debug console.log/warn/error statements
-* Full audit passed: no orphaned comment fragments, no brace mismatches, all autoloaded files verified, uninstall cleanup verified
+* Production release — full audit, all debug statements removed
 
 = 1.6.4 =
-* Fixed: Root cause of missing token found — inline script ran at wp_footer priority 10 BEFORE WordPress prints enqueued scripts at priority 20, so grecaptcha was always undefined. Moved to priority 25 and wrapped in window.addEventListener(load) so Google script is guaranteed loaded before our code runs.
+* Fixed: reCAPTCHA token never populated — inline JS ran before Google's script loaded
 
 = 1.6.3 =
-* Fixed: Removed duplicate woocommerce_login_form_end hook that injected a second empty token field — PHP takes the last value so token was always blank
-* Fixed: JS now blocks form submit if token is not ready, fetches it first then submits
-* Improved: Console warnings now show if reCAPTCHA script fails to load or execute
-* Improved: Spam log now records Googles specific error code so you can diagnose key/domain issues
+* Fixed: Removed duplicate WooCommerce login field causing empty token
 
 = 1.6.2 =
-* Fixed: reCAPTCHA still failing on WooCommerce My Account login — token was being verified twice (single-use tokens always fail on second check). Added WooCommerce nonce detection to skip the wp_authenticate_user check when WooCommerce already verified it.
+* Fixed: WooCommerce login double-verification consuming single-use token
 
 = 1.6.1 =
-* Fixed: reCAPTCHA v3 failing on wp-admin login — JS ran on wp_footer which does not fire on wp-login.php. Added login_footer hook.
-* Fixed: reCAPTCHA failing on WooCommerce My Account login — field was never injected into that form. Added woocommerce_login_form hook and dedicated verify method.
-* Fixed: v3 token JS now creates the hidden field in any form that does not already have one, not just populates existing ones. Also refreshes token on submit since v3 tokens expire after 2 minutes.
+* Fixed: reCAPTCHA on wp-admin and WooCommerce My Account login
 
 = 1.6.0 =
-* New: Quick Block button on every spam log entry — click the red block icon to instantly add an IP, email, or domain to the blocklist without leaving the page. Duplicate detection included.
-* New: Expandable details panel on each log entry — shows name, subject, page URL, and full spam score breakdown
-* New: Stats strip above the log table — total, today, this week, top offending IP
-* Improved: Reason filter now shows properly capitalised labels
+* New: Quick Block button on spam log, expandable details panel, stats strip
 
 = 1.5.8 =
-* Fixed: WooCommerce order notification emails being blocked and diverted to blocked@localhost — content filter and blocklist wp_mail hooks were intercepting ALL outgoing emails including WooCommerce system emails. Now only runs when our timestamp field is present in POST proving it is a monitored form submission. Fixes double email delivery failure notifications.
+* Fixed: WooCommerce order emails being blocked and diverted
 
 = 1.5.7 =
-* Fixed: PHP fatal error (site crash) caused by a broken docblock comment fragment in class-honeypot.php — opening /** was accidentally stripped by a code edit, leaving bare asterisk lines outside any comment block, which is a PHP parse error on every page load.
-
-= 1.5.6 =
-* Fixed: Plugin caused site crash — Pagelayer class was instantiating other module classes inside its check method, re-registering all their WordPress hooks on top of the ones already loaded by Core. Rewrote Pagelayer to use lightweight inline checks with no class instantiation.
-
-= 1.5.5 =
-* Updated: Plugin description and readme now lists all supported form integrations including Pagelayer
-
-= 1.5.4 =
-* Fixed: Hidden fields appearing in emails definitively fixed — wp_mail cleanup now registered in Core at priority 1, always runs before any email is sent regardless of module state or request type
-* New: Pagelayer (Softaculous) contact form integration — full spam checks before form processes
-
-= 1.5.3 =
-* Fixed: Hidden fields still appearing in CF7 emails — root cause found: CF7 submits via admin-ajax.php so is_admin() is true, causing our earlier wp_mail filter to skip. Added a dedicated wp_mail filter specifically for stripping our own field names (pattern: wp_ + 8 hex chars) with no admin/AJAX exclusion.
-
-= 1.5.2 =
-* Fixed: Added second layer of CF7 email cleanup using wpcf7_mail_components — strips hidden fields directly from the built email body as a fallback regardless of CF7 version
-
-= 1.5.1 =
-* Fixed: Honeypot, timestamp, and reCAPTCHA hidden fields were appearing in CF7 email bodies when using the [all-fields] tag. All plugin-injected fields are now stripped from CF7 posted data before the email is built.
+* Fixed: PHP fatal error (orphaned comment fragment) causing site crash
 
 = 1.5.0 =
-* New (FREE): Full Google reCAPTCHA integration — v2 Checkbox, v2 Invisible, v3 score-based. Covers CF7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, WP Login, Registration, Lost Password, WooCommerce Checkout, and generic HTML forms
-* New: reCAPTCHA appears on dashboard module list
-
-= 1.4.2 =
-* Fixed: wp_mail filter was intercepting emails sent by other plugins during admin AJAX requests (e.g. booking/scheduling notifications), causing Network Error on their Save buttons. Filter now skips all admin AJAX requests.
-
-= 1.4.1 =
-* Fixed: Upload & Import button did nothing — AJAX action was registered in the wrong place and never fired on admin pages
+* New (FREE): Google reCAPTCHA v2/v3 integration across all form plugins
 
 = 1.4.0 =
-* New (PRO): Upload domain list directly from your browser — no FTP, no cPanel needed. Pick a .txt file, click Upload & Import, done. Accepts up to 5 MB, validates every line, shows count and status immediately.
-
-= 1.3.2 =
-* Fixed: Support email corrected to support@dadsfam.co.za
-
-= 1.3.1 =
-* Fixed: Support banner and PRO feature grid now always visible on the PRO page — whether licensed or not
-* Fixed: ⭐ PRO nav button was being clipped on the right edge
-* Improved: PRO page now shows "Your PRO Features" heading and "all unlocked" message when licensed
+* New (PRO): Upload domain list directly from browser
 
 = 1.3.0 =
-* Fixed: "Sorry, you are not allowed to access this page" error after activating PRO license — PRO page is now always registered regardless of license status
-* Fixed: After license activation, redirects cleanly to dashboard instead of reloading the PRO page
-* Improved: PRO page redesigned with warm support banner — makes clear PRO is purely to support development, not to lock out features
-* Improved: Contact Support email button added to PRO page alongside Get PRO button
-* Improved: ⭐ PRO nav link now always visible in header (shows active state when licensed)
-* Fixed: Blocklist card description text was being cut off — card title now wraps correctly
+* Fixed: Page error after license activation; PRO page always visible
 
 = 1.2.0 =
-* New: Full PRO licensing system — verify key against dadsfam.co.za, two-factor HMAC integrity check, hourly background re-verify, force-lock REST endpoint
-* New: License activate/deactivate from PRO page with live status display
-* Fixed: Settings turning OFF after saving the Blocklist page (critical bug — forms now use context markers so each form only updates its own fields)
-* Fixed: Blocklist entries being wiped after saving the Settings page (same root cause)
-* Improved: PRO page redesigned — shows full license status when active, clean activation form when not
+* New: Full DF Licensing system; Fixed: settings wiping blocklist on save
 
 = 1.1.0 =
-* New (PRO): Auto-updating disposable email domain list
-* New: Changelog admin page
+* New (PRO): Auto-updating disposable domain list; Changelog page
 
 = 1.0.0 =
 * Initial release

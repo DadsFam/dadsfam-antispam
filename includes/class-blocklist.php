@@ -141,7 +141,8 @@ class DFSAS_Blocklist {
                 'details'   => [ 'keyword' => $check['keyword'] ],
                 'score'     => 8,
             ] );
-            $atts['to'] = 'blocked@localhost'; // divert silently
+            // Log only — wp_mail is too broad to block safely.
+            // Form-specific hooks (CF7, WPForms etc.) handle actual blocking.
         }
         return $atts;
     }
