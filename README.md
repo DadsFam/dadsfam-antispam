@@ -1,106 +1,116 @@
 # DadsFam Anti-Spam
 
-**Pro-grade form & email spam protection.**  
-Honeypots, time checks, rate limiting, IP/email/keyword blocklists, content scoring, disposable email detection, DNSBL, geo-blocking, and a full spam log — all running on **your own server**. No subscriptions. No data sent anywhere.
+**Pro-grade spam protection for WordPress** — contact forms, comments, logins, registrations, and WooCommerce, all in one plugin. No subscriptions.
 
-**Version:** 1.6.5  
-**Author:** DadsFam  
-**Website:** [dadsfam.co.za](https://www.dadsfam.co.za/plugins-dadsfam-co-za/)
+**Version:** 1.8.3  
+**Contributors:** dadsfam  
+**Tags:** anti-spam, spam protection, contact form, honeypot, recaptcha, comment spam, blocklist  
+**Requires at least:** 5.8  
+**Tested up to:** 6.7  
+**Requires PHP:** 7.4  
+**Stable tag:** 1.8.3  
+**License:** GPLv2 or later  
+**License URI:** https://www.gnu.org/licenses/gpl-2.0.html
 
 ---
 
-### Features
+### Description
 
-#### ✅ Free Features
-- 🍯 **Honeypot Trap** – Works with Contact Form 7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, Pagelayer & generic forms
-- ⏱️ **Time-Based Check** – Blocks bots that submit too quickly
-- 🚦 **Rate Limiter** – Per-IP throttling with configurable lockout
-- 🚫 **IP / Email / Domain / Keyword Blocklist**
-- 📊 **Content Filter** – Smart scoring engine (links, HTML, spam phrases, suspicious TLDs)
-- ✉️ **Email Validator** – MX record check + disposable email detection
-- 📋 **Spam Log** – View last 200 blocked submissions with reason and score
+**DadsFam Anti-Spam** stops spam across your entire WordPress site. Every check runs locally — no data is sent to any third-party service.
 
-#### ⭐ Pro Features (License Key)
-- 🌐 **DNSBL IP Reputation** – Real-time checks (Spamhaus, SpamCop, SORBS, etc.)
-- 🗺️ **Geo-Blocking** – Block entire countries
-- 📧 **1,500+ Disposable Email Domains**
-- ♾️ **Unlimited Blocklist Entries** + CIDR & Wildcard support
-- ✅ **Whitelist** – Always allow specific IPs and emails
-- 📊 **CSV Log Export**
-- 📬 **Email Digest** – Daily or weekly summary
-- 🧹 **Auto Log Cleanup**
-- 🔑 Full DadsFam Licensing integration
+**What it protects:**
+
+- 📝 Contact forms — CF7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, Pagelayer, and any generic HTML form
+- 💬 WordPress comment forms — honeypot, time check, content scoring, blocklist
+- 🔐 WordPress login and registration
+- 🔑 WooCommerce My Account login and checkout
+- 🔄 Lost password form
+- 🌐 Any other HTML form on your site via JavaScript injection
+
+### Free Features
+
+- 🍯 Honeypot trap — invisible fields injected into all forms
+- ⏱️ Time-based check — blocks submissions under your minimum seconds threshold
+- 🚦 Rate limiter — per-IP throttle with configurable window and lockout
+- 🚫 IP / email / domain / keyword blocklist
+- 📊 Content filter scoring — excessive links, HTML injection, spam phrases, suspicious TLDs
+- ✉️ Email validator — MX record check + 50 built-in disposable email domains
+- 💬 Comment spam protection — honeypot, time check, rate limiting, blocklist, and content scoring
+- 🔑 Google reCAPTCHA v2 / v2 Invisible / v3 support
+- 🐙 Pull from GitHub — one-click update of disposable email domain list
+- 📋 Spam log — last 200 blocked submissions with Quick Block and expandable details
+- 🔌 DF Licensing integration hook ready
+
+### Pro Features
+
+- 🌐 DNSBL IP reputation — real-time check against Spamhaus, SpamCop, SORBS
+- 🗺️ Geo-blocking — block by country ISO code
+- 📧 1,500+ disposable email domains — extended database with auto-update
+- ♾️ Unlimited blocklist entries — no Free-tier caps
+- 🔀 CIDR & wildcard IP blocking
+- ✅ Whitelist — always-allow specific IPs and emails
+- 📊 CSV log export
+- 📬 Email digest — daily or weekly spam summary
+- 🧹 Auto log cleanup
+
+**Supported Integrations:**  
+Contact Form 7 · WPForms · Ninja Forms · Gravity Forms · Fluent Forms · Pagelayer · WooCommerce · WordPress Comments, Login, Registration, Lost Password · Any generic HTML form
 
 ---
 
 ### Installation
 
-1. Download the latest release from this repository
-2. Upload the `dadsfam-antispam` folder to `/wp-content/plugins/`
-3. Activate **DadsFam Anti-Spam** in WordPress
-4. Go to **Anti-Spam → Settings** to configure
-
-### Quick Start
-
-1. Activate the plugin — basic protection (honeypot + time check) works immediately
-2. Visit **Anti-Spam → Settings** to enable additional protections
-3. Monitor blocked attempts in **Anti-Spam → Spam Log**
+1. Upload the `dadsfam-antispam` folder to `/wp-content/plugins/`
+2. Activate via **Plugins → Installed Plugins**
+3. Go to **Anti-Spam → Settings** — all core modules are ON by default
+4. That's it. Your forms, comments, and logins are protected immediately.
 
 ---
 
-### ❤️ A Note from the Developer
+### Frequently Asked Questions
 
-This plugin is and will always remain **100% FREE** for core features.
+**= Does this replace Akismet?**  
+Yes. The comment protection covers everything Akismet does plus adds honeypot, time check, rate limiting, and blocklist checks.
 
-I’m a Dad from South Africa building tools that help small businesses. If this plugin saves you time and reduces spam headaches, consider buying a **Pro License**. It’s not just a key — it’s real support that helps me keep developing quality free plugins for the WordPress community.
+**= Does it affect site performance?**  
+No. All checks use fast PHP logic and WordPress transients.
 
-Thank you for your support ❤️  
-Love from South Africa 🇿🇦
+**= Does it filter incoming emails to my mailbox?**  
+No — this plugin protects forms on your site, not incoming mailbox email.
 
-### 🌐 Connect With Us
-- **Website**: [dadsfam.co.za](https://www.dadsfam.co.za/plugins-dadsfam-co-za/)
-- **Support**: support@dadsfam.co.za
-- **X / Twitter**: [@DADSFAM](https://x.com/DADSFAM)
-- **Instagram**: [@dadsfamshop](https://www.instagram.com/dadsfamshop/)
-- **GitHub**: [DadsFam](https://github.com/DadsFam)
+**= Where is my data stored?**  
+Everything stays on your server in the spam log table.
 
 ---
 
 ### Changelog
 
-**1.6.5** (2026-06-03)
-- Production release — removed all debug `console.log`, `console.warn`, and `console.error` statements
-- Full code audit completed: fixed orphaned comment fragments, brace mismatches, and autoloader issues
-- Improved `uninstall.php` cleanup
-- Updated plugin headers and readme files
-- General stability improvements
+**= 1.8.3 =**  
+* Fixed: wp_mail content and blocklist filters were diverting legitimate contact form emails (including Gmail addresses) to blocked@localhost. These filters now LOG suspicious mail only — never block. Blocking is handled exclusively by form-specific hooks (CF7, WPForms etc.)
 
-**1.6.4**
-- Fixed reCAPTCHA v3 token loading issue (script timing)
+**= 1.8.2 =**  
+* Fixed: Auto-update frequency change had no effect  
+* Fixed: wp_clear_scheduled_hook() used instead of wp_unschedule_event()  
+* Improved: Label changed to "Enable Automatic Updates"
 
-**1.6.3**
-- Fixed duplicate WooCommerce login hook causing blank reCAPTCHA token
-- Improved reCAPTCHA error handling and logging
+**= 1.8.1 =**  
+* Removed: Internal admin tool not intended for public distribution  
+* Improved: Settings and changelog cleaned up
 
-**1.6.2**
-- Fixed reCAPTCHA double verification on WooCommerce My Account login
+**= 1.8.0 =**  
+* New (FREE): Full comment spam protection — honeypot, time check, rate limiting, blocklist, content scoring on all WordPress comment forms
 
-**1.6.1**
-- Added proper reCAPTCHA support for wp-login.php and WooCommerce My Account
+**= 1.7.1 =**  
+* New: Extended auto-update frequency options
 
-**1.6.0**
-- New: Quick Block button in spam log
-- New: Expandable log details with full score breakdown
-- New: Statistics bar (total, today, this week, top IP)
+**= 1.6.5 =**  
+* Production release — full audit, all debug statements removed
 
-**Older versions**
-- See [changelog.txt](changelog.txt) for full history
+**Older versions** — see full changelog in `readme.txt`
 
 ---
 
 ### License
 GPLv2 or later
 
----
-
-Made with ❤️ by [DadsFam](https://www.dadsfam.co.za/) — A South African Dad building tools for busy store owners.
+Made with ❤️ by [DadsFam](https://dadsfam.co.za) — South Africa
