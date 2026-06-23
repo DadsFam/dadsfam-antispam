@@ -1,6 +1,8 @@
 # DadsFam Anti-Spam
 
-**Pro-grade spam protection for WordPress** — Contact forms, comments, logins, registrations, and WooCommerce. All checks run locally.
+**Pro-grade spam protection for WordPress** — Contact forms, comments, logins, registrations, and WooCommerce. All checks run locally on your server.
+
+![DadsFam Anti-Spam Dashboard](DADSFAM%20ANTI%20SPAM%20WORDPRESS%20PLUGIN.png)
 
 **Version:** 1.9.5  
 **Author:** DadsFam  
@@ -11,24 +13,23 @@
 ### Features
 
 #### ✅ Free Features
-- 🍯 Honeypot Trap (all major form plugins + generic forms)
+- 🍯 Honeypot Trap (CF7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, Pagelayer + generic forms)
 - ⏱️ Time-based protection
 - 🚦 Rate Limiter
 - 🚫 IP / Email / Domain / Keyword Blocklist
-- 📊 Content scoring filter
-- ✉️ Email validator + disposable domain detection
+- 📊 Content scoring & spam detection
+- ✉️ Disposable email detection
 - 💬 Full WordPress Comment spam protection
-- 🔑 Google reCAPTCHA v2 / v3 support
+- 🔑 Google reCAPTCHA v2 & v3 support
 - 📋 Detailed Spam Log with Quick Block
-- 🔌 Ready for DF Licensing
 
 #### ⭐ Pro Features
-- 🌐 DNSBL checks (Spamhaus, SpamCop, etc.)
+- 🌐 DNSBL IP reputation checks
 - 🗺️ Geo-blocking by country
 - ♾️ Unlimited blocklist entries + CIDR support
-- ✅ Whitelist
-- 📧 1500+ disposable domains with auto-update
-- 📊 CSV Export + Email Digest + Auto Cleanup
+- ✅ Whitelist support
+- 📧 1,500+ disposable domains with auto-update
+- 📊 CSV Export, Email Digest & Auto Cleanup
 
 ---
 
@@ -59,18 +60,10 @@ Love from South Africa 🇿🇦
 ### Changelog
 
 **1.9.5** (2026-06-03)
-- Added automatic database upgrade routine on plugin update
+- Added automatic database upgrade routine
 - Improved autoloader and core initialization
-- Added dedicated Comments protection class
-- General stability and code improvements
-
-**1.9.4**
-- Dark/Light mode toggle + redesigned dashboard
-
-**1.9.3**
-- Blocklisted IPs now blocked at login level
-
-See `readme.txt` for full history.
+- Enhanced comment spam protection
+- General stability improvements
 
 ---
 
