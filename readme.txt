@@ -4,7 +4,7 @@ Tags: anti-spam, spam protection, contact form, honeypot, recaptcha, comment spa
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.8.3
+Stable tag: 1.9.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,32 @@ Everything stays on your server in the `{prefix}dfsas_spam_log` table. Nothing i
 Add: `add_filter('dfsas_is_pro', fn() => df_license_is_valid('dadsfam-antispam'));`
 
 == Changelog ==
+
+= 1.9.5 =
+* New: Dark / Light mode toggle with saved preference (follows your system on first visit)
+* New: Redesigned animated dashboard hero with live status, all-time and today's blocked counts
+* Improved: Full dark-theme styling across every screen; smoother fluid motion (respects reduce-motion)
+
+= 1.9.4 =
+* New: Premium admin UI overhaul — glass cards, animated gradient backdrop, 3D tilt, count-up stats, gradient headings, glowing toggles, shimmer buttons, smooth entrance animations (respects reduce-motion)
+
+= 1.9.3 =
+* New: Block blocklisted IPs at WordPress login (not just forms) — on by default, respects whitelist, toggleable on the Blocklist page
+
+= 1.9.2 =
+* Fixed: Quick Block on the spam log now correctly saves IPs/emails/domains to the blocklist
+* Improved: Removed a confusing server-specific help note on the Settings page
+
+= 1.9.1 =
+* New: Blocked Usernames list for registration (supports * wildcards)
+* New: Backup & Restore — export/import your full settings as a JSON file
+* Improved: Added form-type database index for faster dashboard queries (auto-applied on update)
+
+= 1.9.0 =
+* New: Visual dashboard with 30-day spam trend chart, Protection Health score, and Spam by Source breakdown
+* New: Comment author-link detection (flags URLs in the author name field)
+* New: Non-Latin script detection for comments (opt-in — Cyrillic/CJK/Arabic)
+* Improved: Every PHP file linted before release; refreshed dashboard styling
 
 = 1.8.3 =
 * Fixed: wp_mail content and blocklist filters were diverting legitimate contact form emails (including Gmail addresses) to blocked@localhost. These filters now LOG suspicious mail only — never block. Blocking is handled exclusively by form-specific hooks (CF7, WPForms etc.) which are targeted and reliable.

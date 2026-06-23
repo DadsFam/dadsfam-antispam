@@ -145,9 +145,35 @@ class DFSAS_Comments {
         $email   = sanitize_email( $commentdata['comment_author_email'] ?? '' );
         $content = $commentdata['comment_content'] ?? '';
         $url     = $commentdata['comment_author_url'] ?? '';
+        $author  = $commentdata['comment_author'] ?? '';
 
         $score   = 0;
         $reasons = [];
+
+        // ── Author name contains a URL or link — classic spam signal ──────────
+        // (Antispam-Bee style: real people don't put http:// in their name field)
+        if ( preg_match( '#https?://|www\.|\[url|<a\s#i', $author ) || DFSAS_Helpers::count_urls( $author ) > 0 ) {
+            $score    += 6;
+            $reasons[] = 'link_in_author_name';
+        }
+
+        // ── Author name is suspiciously long (bots stuff keywords here) ───────
+        if ( mb_strlen( $author ) > 50 ) {
+            $score    += 2;
+            $reasons[] = 'author_name_too_long';
+        }
+
+        // ── Non-Latin / mixed-script content (opt-in) ─────────────────────────
+        // Catches Cyrillic / CJK / Arabic comment spam on English-language sites.
+        if ( ! empty( $this->opts['comment_block_non_latin'] ) ) {
+            // Count Cyrillic, CJK, Arabic, Hangul characters in the comment body
+            $non_latin = preg_match_all( '/[\x{0400}-\x{04FF}\x{4E00}-\x{9FFF}\x{0600}-\x{06FF}\x{AC00}-\x{D7AF}\x{3040}-\x{30FF}]/u', $content );
+            $total_chars = max( 1, mb_strlen( preg_replace( '/\s+/', '', $content ) ) );
+            if ( $non_latin > 0 && ( $non_latin / $total_chars ) > 0.30 ) {
+                $score    += 7;
+                $reasons[] = 'non_latin_script';
+            }
+        }
 
         // Excessive links
         $link_count = DFSAS_Helpers::count_urls( $content . ' ' . $url );

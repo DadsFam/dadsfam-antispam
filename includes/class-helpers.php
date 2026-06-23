@@ -144,4 +144,93 @@ class DFSAS_Helpers {
     public static function is_valid_ip( string $ip ): bool {
         return (bool) filter_var( trim( $ip ), FILTER_VALIDATE_IP );
     }
+
+    /**
+     * Build a self-contained SVG area chart from daily data.
+     * No external library, no CDN — pure inline SVG, WordPress.org safe.
+     *
+     * @param array $by_day  Rows of [ 'day' => 'YYYY-MM-DD', 'cnt' => int ]
+     * @param int   $days    How many days back to render (fills gaps with 0)
+     * @return array [ 'svg' => string, 'peak' => int, 'peak_day' => string, 'total' => int ]
+     */
+    public static function build_trend_chart( array $by_day, int $days = 30 ): array {
+        // Build a date => count map, defaulting every day in range to 0
+        $map = [];
+        for ( $i = $days - 1; $i >= 0; $i-- ) {
+            $d = gmdate( 'Y-m-d', strtotime( "-{$i} days" ) );
+            $map[ $d ] = 0;
+        }
+        foreach ( $by_day as $row ) {
+            $d = $row['day'] ?? '';
+            if ( isset( $map[ $d ] ) ) {
+                $map[ $d ] = (int) $row['cnt'];
+            }
+        }
+
+        $values   = array_values( $map );
+        $dates    = array_keys( $map );
+        $count    = count( $values );
+        $peak     = $count ? max( $values ) : 0;
+        $peak_idx = $count ? array_search( $peak, $values, true ) : 0;
+        $total    = array_sum( $values );
+
+        // SVG geometry
+        $w   = 720;
+        $h   = 180;
+        $pad = 8;
+        $plot_h = $h - ( $pad * 2 );
+        $plot_w = $w - ( $pad * 2 );
+        $max = max( 1, $peak );
+
+        $step = $count > 1 ? $plot_w / ( $count - 1 ) : $plot_w;
+
+        $line_pts = [];
+        $area_pts = [];
+        foreach ( $values as $i => $v ) {
+            $x = round( $pad + ( $i * $step ), 1 );
+            $y = round( $pad + $plot_h - ( ( $v / $max ) * $plot_h ), 1 );
+            $line_pts[] = "{$x},{$y}";
+        }
+
+        if ( empty( $line_pts ) ) {
+            return [ 'svg' => '', 'peak' => 0, 'peak_day' => '', 'total' => 0 ];
+        }
+
+        $first_x = $pad;
+        $last_x  = round( $pad + ( ( $count - 1 ) * $step ), 1 );
+        $base_y  = $pad + $plot_h;
+        $line_path = 'M' . implode( ' L', $line_pts );
+        $area_path = "M{$first_x},{$base_y} L" . implode( ' L', $line_pts ) . " L{$last_x},{$base_y} Z";
+
+        // Build SVG
+        $svg  = '<svg viewBox="0 0 ' . $w . ' ' . $h . '" preserveAspectRatio="none" class="dfsas-chart-svg" role="img" aria-label="Spam blocked over time">';
+        $svg .= '<defs><linearGradient id="dfsasGrad" x1="0" y1="0" x2="0" y2="1">';
+        $svg .= '<stop offset="0%" stop-color="#1a5e9a" stop-opacity="0.28"/>';
+        $svg .= '<stop offset="100%" stop-color="#1a5e9a" stop-opacity="0.02"/>';
+        $svg .= '</linearGradient></defs>';
+
+        // Subtle horizontal gridlines (quarters)
+        for ( $g = 1; $g <= 3; $g++ ) {
+            $gy = round( $pad + ( $plot_h * $g / 4 ), 1 );
+            $svg .= '<line x1="' . $pad . '" y1="' . $gy . '" x2="' . ( $w - $pad ) . '" y2="' . $gy . '" stroke="#e9ecef" stroke-width="1"/>';
+        }
+
+        $svg .= '<path d="' . $area_path . '" fill="url(#dfsasGrad)"/>';
+        $svg .= '<path d="' . $line_path . '" fill="none" stroke="#1a5e9a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+
+        // Peak dot
+        if ( $peak > 0 && isset( $line_pts[ $peak_idx ] ) ) {
+            [ $px, $py ] = explode( ',', $line_pts[ $peak_idx ] );
+            $svg .= '<circle cx="' . $px . '" cy="' . $py . '" r="4" fill="#1a5e9a" stroke="#fff" stroke-width="2"/>';
+        }
+
+        $svg .= '</svg>';
+
+        return [
+            'svg'      => $svg,
+            'peak'     => $peak,
+            'peak_day' => $dates[ $peak_idx ] ?? '',
+            'total'    => $total,
+        ];
+    }
 }

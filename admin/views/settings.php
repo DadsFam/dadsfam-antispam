@@ -276,14 +276,6 @@ $is_pro = DFSAS_Helpers::is_pro();
                     <span class="dfsas-hint"><?php esc_html_e('Weekly is recommended — the disposable domain list rarely changes more than once a week.','dadsfam-antispam'); ?></span>
                 </div>
 
-                <div class="dfsas-notice dfsas-notice--info dfsas-notice--sm" style="margin-top:8px">
-                    💡 <?php printf(
-                        esc_html__('Create the file at %s and paste in domain names. A good free source: %s','dadsfam-antispam'),
-                        '<code>dadsfam.co.za/anti-spam/disposable-domains.txt</code>',
-                        '<a href="https://github.com/disposable-email-domains/disposable-email-domains" target="_blank">disposable-email-domains on GitHub</a>'
-                    ); ?>
-                </div>
-
                 <div style="border-top:1px solid var(--df-gray-2);margin:16px 0"></div>
 
                 <!-- ── Upload button ── -->
@@ -392,6 +384,14 @@ $is_pro = DFSAS_Helpers::is_pro();
                 <div class="dfsas-notice dfsas-notice--info dfsas-notice--sm" style="margin-top:8px">
                     💡 <?php esc_html_e('Content scoring uses the same threshold from Content Filter settings above. Spam comments go to Comments → Spam in your dashboard for review, not deleted permanently.','dadsfam-antispam'); ?>
                 </div>
+
+                <div class="dfsas-setting-row" style="margin-top:12px">
+                    <label class="dfsas-toggle"><input type="checkbox" name="dfsas_options[comment_block_non_latin]" value="1" <?php checked(!empty($opts['comment_block_non_latin'])); ?> /><span class="dfsas-toggle__slider"></span></label>
+                    <div class="dfsas-setting__text">
+                        <strong><?php esc_html_e('Flag non-Latin script comments','dadsfam-antispam'); ?></strong>
+                        <p><?php esc_html_e('Adds spam score to comments that are mostly Cyrillic, Chinese, Japanese, Korean, or Arabic. Useful for English-language sites getting foreign-script comment spam. Leave off if your site serves those languages.','dadsfam-antispam'); ?></p>
+                    </div>
+                </div>
             </div>
 
             <!-- ── Logging ────────────────────────────────────────────────── -->
@@ -411,5 +411,18 @@ $is_pro = DFSAS_Helpers::is_pro();
             </div>
 
         </form>
+
+        <!-- ── Backup & Restore ────────────────────────────────────────────── -->
+        <div class="dfsas-card">
+            <h2 class="dfsas-card__title">💾 <?php esc_html_e('Backup &amp; Restore Settings','dadsfam-antispam'); ?></h2>
+            <p class="dfsas-card__desc"><?php esc_html_e('Export your entire configuration to a file, or import one from another site. Your reCAPTCHA secret key is never included in exports for security.','dadsfam-antispam'); ?></p>
+            <div class="dfsas-actions-row">
+                <button type="button" class="dfsas-btn dfsas-btn--secondary dfsas-btn--sm" id="dfsas-export-settings">⬇️ <?php esc_html_e('Export Settings','dadsfam-antispam'); ?></button>
+                <label class="dfsas-btn dfsas-btn--secondary dfsas-btn--sm" for="dfsas-import-file" style="cursor:pointer">⬆️ <?php esc_html_e('Import Settings','dadsfam-antispam'); ?></label>
+                <input type="file" id="dfsas-import-file" accept=".json,application/json" style="display:none" />
+            </div>
+            <p id="dfsas-backup-msg" style="font-size:13px;margin-top:10px;min-height:18px"></p>
+        </div>
+
     </div>
 </div>

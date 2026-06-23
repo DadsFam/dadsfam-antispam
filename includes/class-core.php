@@ -172,6 +172,7 @@ class DFSAS_Core {
             'enable_content_filter'   => 1,
             'enable_email_validator'  => 1,
             'enable_comments'         => 1,  // comment spam protection
+            'comment_block_non_latin' => 0,  // opt-in: flag Cyrillic/CJK/Arabic comments
             'enable_dnsbl'            => 0,  // PRO
             'enable_geo_block'        => 0,  // PRO
             'enable_log_cleanup'      => 0,  // PRO
@@ -191,8 +192,10 @@ class DFSAS_Core {
             'rate_limit_lockout'      => 86400,  // 24 hours after exceeding
             // ── Blocklists ───────────────────────────────────────────────────
             'blocked_ips'             => '',
+            'block_login_ip'          => 1,  // also block blocklisted IPs at login
             'blocked_emails'          => '',
             'blocked_domains'         => '',
+            'blocked_usernames'       => "admin\nadministrator\ntest\nseo\nsupport\nwebmaster",
             'blocked_keywords'        => "casino\nviagra\ncialis\npayday loan\nbuy followers\nseo backlinks\ncheap seo\ncrypto investment\nbinary options",
             // ── Content Filter ───────────────────────────────────────────────
             'max_links_allowed'       => 2,

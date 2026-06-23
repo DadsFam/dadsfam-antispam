@@ -4,6 +4,24 @@
 
     const { nonce, ajaxurl, strings } = window.dfsasAdmin || {};
 
+    // ═══════════════════════════════════════════════════════════════════════
+    //  THEME ENGINE — dark / light with persistence + system default
+    //  Applies immediately (footer script = DOM ready) to minimise any flash.
+    // ═══════════════════════════════════════════════════════════════════════
+    (function applyThemeNow() {
+        try {
+            const w = document.querySelector('.dfsas-wrap');
+            if (!w) return;
+            let saved = null;
+            try { saved = localStorage.getItem('dfsasTheme'); } catch (e) {}
+            const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            w.setAttribute('data-theme', saved || (sysDark ? 'dark' : 'light'));
+            // enable colour transitions only after first paint (no load flash)
+            setTimeout(function () { w.classList.add('dfsas-theme-ready'); }, 60);
+        } catch (e) {}
+    })();
+
+
     // ── Utility ──────────────────────────────────────────────────────────────
 
     function showMsg(selector, text, type) {
@@ -354,6 +372,126 @@
         const $badge = $card.find('.dfsas-count-badge').first();
         const text   = $badge.text().replace(/^\d+/, lines);
         $badge.text(text);
+    });
+
+    // ── Export settings ───────────────────────────────────────────────────
+    $(document).on('click', '#dfsas-export-settings', function () {
+        const $msg = $('#dfsas-backup-msg').text('Preparing export…').css('color', '#6c757d');
+        ajax('dfsas_export_settings')
+            .done(res => {
+                if (res.success && res.data.json) {
+                    const blob = new Blob([res.data.json], { type: 'application/json' });
+                    const url  = URL.createObjectURL(blob);
+                    const a    = document.createElement('a');
+                    const date = new Date().toISOString().slice(0, 10);
+                    a.href = url;
+                    a.download = 'dadsfam-antispam-settings-' + date + '.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    $msg.text('✅ Settings exported.').css('color', '#1a8a4a');
+                } else {
+                    $msg.text('❌ Export failed.').css('color', '#c0392b');
+                }
+            })
+            .fail(() => $msg.text('❌ Export failed. Try again.').css('color', '#c0392b'));
+    });
+
+    // ── Import settings ───────────────────────────────────────────────────
+    $(document).on('change', '#dfsas-import-file', function () {
+        const file = this.files && this.files[0];
+        const $msg = $('#dfsas-backup-msg');
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            $msg.text('Importing…').css('color', '#6c757d');
+            ajax('dfsas_import_settings', { json: e.target.result })
+                .done(res => {
+                    if (res.success) {
+                        $msg.text(res.data.message).css('color', '#1a8a4a');
+                        setTimeout(() => window.location.reload(), 1200);
+                    } else {
+                        $msg.text('❌ ' + res.data).css('color', '#c0392b');
+                    }
+                })
+                .fail(() => $msg.text('❌ Import failed. Try again.').css('color', '#c0392b'));
+        };
+        reader.readAsText(file);
+        this.value = ''; // allow re-importing the same file
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  PREMIUM UI ENHANCEMENTS — count-up stats + subtle 3D tilt
+    //  Purely visual, fails silently if elements aren't present.
+    // ═══════════════════════════════════════════════════════════════════════
+    $(function () {
+        // Respect reduced-motion
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // ── Inject the dark/light toggle into the header nav ──────────────
+        (function injectThemeToggle() {
+            const w   = document.querySelector('.dfsas-wrap');
+            const nav = w && w.querySelector('.dfsas-header__nav');
+            if (!w || !nav || w.querySelector('.dfsas-theme-toggle')) return;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'dfsas-theme-toggle';
+            btn.setAttribute('aria-label', 'Toggle dark mode');
+            btn.title = 'Toggle dark / light mode';
+            btn.innerHTML =
+                '<span class="dfsas-tt-track">' +
+                    '<span class="dfsas-tt-icon dfsas-tt-sun">\u2600</span>' +
+                    '<span class="dfsas-tt-icon dfsas-tt-moon">\u263E</span>' +
+                    '<span class="dfsas-tt-thumb"></span>' +
+                '</span>';
+            nav.insertBefore(btn, nav.firstChild);
+            btn.addEventListener('click', function () {
+                const next = w.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                w.setAttribute('data-theme', next);
+                try { localStorage.setItem('dfsasTheme', next); } catch (e) {}
+            });
+        })();
+
+        // ── Animated count-up on stat values ──────────────────────────────
+        if (!reduce) {
+            $('.dfsas-stat__val').each(function () {
+                const $el  = $(this);
+                const text = ($el.text() || '').trim();
+                const target = parseInt(text.replace(/[^\d]/g, ''), 10);
+                if (isNaN(target) || target === 0) return;
+                const dur = 900;
+                const start = performance.now();
+                function tick(now) {
+                    const p = Math.min(1, (now - start) / dur);
+                    // easeOutCubic
+                    const eased = 1 - Math.pow(1 - p, 3);
+                    $el.text(Math.round(target * eased).toLocaleString());
+                    if (p < 1) requestAnimationFrame(tick);
+                    else $el.text(target.toLocaleString());
+                }
+                requestAnimationFrame(tick);
+            });
+        }
+
+        // ── Subtle 3D tilt on stat cards (follows cursor) ─────────────────
+        if (!reduce && window.matchMedia('(hover: hover)').matches) {
+            document.querySelectorAll('.dfsas-stat').forEach(function (card) {
+                const MAX = 7; // degrees
+                card.addEventListener('mousemove', function (e) {
+                    const r = card.getBoundingClientRect();
+                    const px = (e.clientX - r.left) / r.width  - 0.5;
+                    const py = (e.clientY - r.top)  / r.height - 0.5;
+                    card.style.transform =
+                        'perspective(700px) rotateX(' + (-py * MAX).toFixed(2) + 'deg) rotateY(' +
+                        (px * MAX).toFixed(2) + 'deg) translateY(-6px) scale(1.03)';
+                });
+                card.addEventListener('mouseleave', function () {
+                    card.style.transform = '';
+                });
+            });
+        }
     });
 
 })(jQuery);

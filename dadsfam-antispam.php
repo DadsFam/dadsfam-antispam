@@ -3,7 +3,7 @@
  * Plugin Name:       DadsFam Anti-Spam
  * Plugin URI:        https://dadsfam.co.za/plugins/anti-spam
  * Description:       Pro-grade spam protection for WordPress. Covers contact forms, comment forms, user registrations, logins, and WooCommerce — all in one plugin. Honeypots, time checks, IP/email/keyword blocklists, rate limiting, disposable email detection, Google reCAPTCHA (v2/v3), DNSBL, geo-blocking, comment spam scoring, and a full spam log. No subscriptions. No data sent anywhere. Supports Contact Form 7, WPForms, Ninja Forms, Gravity Forms, Fluent Forms, Pagelayer, WooCommerce, WordPress Login/Registration, WordPress Comments, and all generic HTML forms.
- * Version:           1.8.3
+ * Version:           1.9.5
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            DadsFam
@@ -16,7 +16,8 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'DFSAS_VERSION',  '1.8.3' );
+define( 'DFSAS_VERSION',  '1.9.5' );
+define( 'DFSAS_DB_VERSION', '1.1' );
 define( 'DFSAS_FILE',     __FILE__ );
 define( 'DFSAS_PATH',     plugin_dir_path( __FILE__ ) );
 define( 'DFSAS_URL',      plugin_dir_url( __FILE__ ) );
@@ -52,7 +53,7 @@ register_activation_hook( __FILE__, static function (): void {
     if ( ! get_option( 'dfsas_options' ) ) {
         update_option( 'dfsas_options', DFSAS_Core::default_options(), false );
     }
-    update_option( 'dfsas_db_version', '1.0', false );
+    update_option( 'dfsas_db_version', DFSAS_DB_VERSION, false );
     update_option( 'dfsas_version', DFSAS_VERSION, false );
 } );
 
@@ -67,3 +68,14 @@ add_action( 'plugins_loaded', static function (): void {
     ( new DFSAS_License() )->init();
     DFSAS_Core::instance()->init();
 }, 5 );
+
+// ── Database upgrade check ────────────────────────────────────────────────────
+// Runs when the plugin is updated WITHOUT a deactivate/reactivate cycle.
+// dbDelta is idempotent — it safely adds any missing columns/indexes and
+// never touches existing data. This keeps the schema current automatically.
+add_action( 'plugins_loaded', static function (): void {
+    if ( get_option( 'dfsas_db_version' ) !== DFSAS_DB_VERSION ) {
+        DFSAS_Logger::create_table();
+        update_option( 'dfsas_db_version', DFSAS_DB_VERSION, false );
+    }
+}, 6 );

@@ -36,7 +36,8 @@ class DFSAS_Logger {
             PRIMARY KEY  (id),
             KEY ip_address (ip_address(20)),
             KEY blocked_at (blocked_at),
-            KEY reason     (reason(40))
+            KEY reason     (reason(40)),
+            KEY form_type  (form_type)
         ) {$charset};";
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -189,6 +190,13 @@ class DFSAS_Logger {
                  GROUP BY day ORDER BY day ASC",
                 ARRAY_A
             ),
+            'by_form'    => (array) $wpdb->get_results(
+                "SELECT form_type, COUNT(*) AS cnt FROM {$table}
+                 GROUP BY form_type ORDER BY cnt DESC LIMIT 12",
+                ARRAY_A
+            ),
+            'this_month' => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE blocked_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)" ),
+            'yesterday'  => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE DATE(blocked_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)" ),
         ];
     }
 

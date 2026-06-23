@@ -41,6 +41,48 @@ class DFSAS_Blocklist {
         add_action( 'wpforms_process_before', [ $this, 'check_wpforms' ], 8, 2 );
         add_filter( 'registration_errors',    [ $this, 'check_registration' ], 9, 3 );
         add_filter( 'wp_mail',                [ $this, 'filter_wp_mail' ] );
+
+        // Block blocklisted IPs from logging in too (opt-in, on by default).
+        // Only affects IPs the admin has explicitly blocked, and respects the
+        // whitelist — so whitelisting your own IP keeps you safe. Brute-force /
+        // failed-attempt lockout is intentionally left to dedicated login plugins.
+        if ( ! empty( $this->opts['block_login_ip'] ) ) {
+            add_filter( 'authenticate', [ $this, 'block_login_by_ip' ], 30, 3 );
+        }
+    }
+
+    /**
+     * Reject login attempts coming from a blocklisted IP address.
+     * Runs at priority 30 — after WordPress's own username/password
+     * authenticators — and returns a WP_Error to stop the login.
+     *
+     * @param mixed  $user      WP_User, WP_Error, or null from earlier filters
+     * @param string $username  Submitted username
+     * @param string $password  Submitted password (unused)
+     * @return mixed
+     */
+    public function block_login_by_ip( $user, $username, $password ) {
+        // Not a real credentialed login attempt — leave it alone.
+        if ( empty( $username ) ) {
+            return $user;
+        }
+
+        $ip = DFSAS_Helpers::get_client_ip();
+        if ( $this->check_ip( $ip ) ) {
+            DFSAS_Logger::log( [
+                'form_type' => 'wp-login',
+                'ip'        => $ip,
+                'name'      => $username,
+                'reason'    => 'blocked_ip',
+                'score'     => 10,
+            ] );
+            return new \WP_Error(
+                'dfsas_blocked_ip',
+                __( '<strong>Error:</strong> Login from your IP address has been blocked.', 'dadsfam-antispam' )
+            );
+        }
+
+        return $user;
     }
 
     // ─── Core Checkers ────────────────────────────────────────────────────────
@@ -112,9 +154,34 @@ class DFSAS_Blocklist {
         } elseif ( $this->check_email( $email ) ) {
             DFSAS_Logger::log( [ 'form_type' => 'wp-registration', 'ip' => $ip, 'email' => $email, 'reason' => 'blocked_email', 'score' => 10 ] );
             $errors->add( 'dfsas_blocked', __( '<strong>Error</strong>: Registration blocked.', 'dadsfam-antispam' ) );
+        } elseif ( $this->check_username( $login ) ) {
+            DFSAS_Logger::log( [ 'form_type' => 'wp-registration', 'ip' => $ip, 'email' => $email, 'name' => $login, 'reason' => 'blocked_username', 'score' => 10 ] );
+            $errors->add( 'dfsas_blocked', __( '<strong>Error</strong>: That username is not allowed.', 'dadsfam-antispam' ) );
         }
 
         return $errors;
+    }
+
+    /**
+     * Check a username against the blocked-usernames list.
+     * Supports exact matches and * wildcards (e.g. "spam*" blocks spam123).
+     */
+    public function check_username( string $login ): bool {
+        $login = strtolower( trim( $login ) );
+        if ( '' === $login ) return false;
+
+        $blocked = DFSAS_Helpers::textarea_to_array( $this->opts['blocked_usernames'] ?? '' );
+        foreach ( $blocked as $pattern ) {
+            $pattern = strtolower( trim( $pattern ) );
+            if ( '' === $pattern ) continue;
+            if ( false !== strpos( $pattern, '*' ) ) {
+                $regex = '/^' . str_replace( '\*', '.*', preg_quote( $pattern, '/' ) ) . '$/i';
+                if ( preg_match( $regex, $login ) ) return true;
+            } elseif ( $login === $pattern ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function filter_wp_mail( array $atts ): array {

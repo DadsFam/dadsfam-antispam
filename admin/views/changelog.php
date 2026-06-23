@@ -12,6 +12,169 @@
 
             <div class="dfsas-changelog">
 
+                <!-- ── v1.9.5 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.9.5</span>
+                        <span class="dfsas-changelog__date">20 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Major UI Update</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--new">New</span>
+                            <ul>
+                                <li><strong>🌗 Dark / Light mode</strong> — a smooth animated toggle in the header switches the entire admin interface between a polished light theme and a rich dark theme. Your choice is remembered, and on first visit it follows your operating-system preference automatically.</li>
+                                <li><strong>🎯 Redesigned dashboard hero</strong> — a striking animated gradient banner now greets you at the top with a live "Active &amp; Monitoring" status, your all-time blocked count, and today's total at a glance.</li>
+                                <li>Even smoother, more fluid motion throughout — animated mesh gradients, a live status pulse, and refined transitions across both themes.</li>
+                            </ul>
+                        </div>
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--improved">Improved</span>
+                            <ul>
+                                <li>Every colour, card, table, input, and chart now adapts cleanly to dark mode for comfortable night-time use. All animations still respect the system "reduce motion" setting.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.9.4 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.9.4</span>
+                        <span class="dfsas-changelog__date">19 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Major UI Update</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--new">New</span>
+                            <ul>
+                                <li><strong>✨ Premium admin interface overhaul</strong> — a complete visual refresh across every screen:
+                                    <ul style="margin-top:6px">
+                                        <li>Frosted-glass cards with real depth, layered shadows, and a 3D hover lift</li>
+                                        <li>Live animated gradient backdrop and an aurora accent bar</li>
+                                        <li>Animated count-up on the dashboard stat numbers</li>
+                                        <li>Subtle cursor-following 3D tilt on the stat cards</li>
+                                        <li>Gradient headings and stat numbers, glowing toggles, pulsing module indicators</li>
+                                        <li>Shimmer-sweep buttons, animated progress bars, and smooth staggered entrance animations</li>
+                                        <li>Glass header with blur, focus-glow on inputs, and polished tables</li>
+                                    </ul>
+                                </li>
+                                <li>Fully respects the operating-system "reduce motion" accessibility setting — all animations disable automatically for users who prefer that.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.9.3 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.9.3</span>
+                        <span class="dfsas-changelog__date">16 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Feature Update</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--new">New</span>
+                            <ul>
+                                <li><strong>Block IPs at login</strong> — blocklisted IP addresses can now be stopped from attempting to log in to WordPress, not just from submitting forms. Enabled by default and toggleable on the Blocklist page. It only affects IPs you have explicitly blocked and respects your whitelist, so it won't lock you out. Brute-force / failed-attempt lockout is intentionally left to dedicated login-security plugins to avoid conflicts.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.9.2 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.9.2</span>
+                        <span class="dfsas-changelog__date">14 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li><strong>Quick Block now saves correctly</strong> — clicking Quick Block on a spam-log entry adds the IP, email, or domain to your blocklist as expected. Previously the settings sanitiser ran on the programmatic save and restored the old blocklist, silently discarding the addition. Programmatic saves (Quick Block, Import) now bypass the form rebuild so the value persists.</li>
+                            </ul>
+                        </div>
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--improved">Improved</span>
+                            <ul>
+                                <li>Removed a confusing help note on the Settings page that referenced creating a file on a specific server — the disposable-domain list already updates automatically from the configured URL.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.9.1 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.9.1</span>
+                        <span class="dfsas-changelog__date">14 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Feature Update</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--new">New</span>
+                            <ul>
+                                <li><strong>Blocked Usernames list</strong> — block specific usernames at WordPress registration (Blocklist page). Supports <code>*</code> wildcards, e.g. <code>spam*</code> blocks spam123 and <code>*bot</code> blocks chatbot. Ships with sensible defaults (admin, seo, test, support etc.).</li>
+                                <li><strong>Backup &amp; Restore settings</strong> — export your whole configuration to a JSON file and import it on another site (Settings page). Your reCAPTCHA secret key is never included in exports for security, and import validates the file before applying.</li>
+                            </ul>
+                        </div>
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--improved">Improved</span>
+                            <ul>
+                                <li><strong>Faster log queries</strong> — added a database index on the form-type column so the new "Spam by Source" dashboard panel stays fast even with a large log. A safe automatic upgrade routine applies it to existing installs on update — no data is touched.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.9.0 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.9.0</span>
+                        <span class="dfsas-changelog__date">14 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--feature">Major Update</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--new">New</span>
+                            <ul>
+                                <li><strong>📈 Visual dashboard</strong> — brand new dashboard with a 30-day spam trend chart drawn as a smooth animated area graph, so you can see your spam volume at a glance. Pure inline graphics — no external libraries, no slowdown.</li>
+                                <li><strong>💚 Protection Health score</strong> — an at-a-glance ring showing how well-protected your site is (0–100%) based on active modules and reCAPTCHA, with a one-click link to improve it.</li>
+                                <li><strong>📊 Spam by Source</strong> — see which forms attract the most spam (contact forms vs comments vs login etc.) so you know where to focus.</li>
+                                <li><strong>Day-over-day indicator</strong> — the "Blocked Today" card now shows whether you are up or down versus yesterday.</li>
+                                <li><strong>Comment author-link detection</strong> — comments where the author's <em>name</em> field contains a URL are now flagged. Real people don't put links in their name; spam bots almost always do.</li>
+                                <li><strong>Non-Latin script detection (opt-in)</strong> — flag comments that are mostly Cyrillic, Chinese, Japanese, Korean, or Arabic. Ideal for English-language sites hit by foreign-script comment spam. Off by default; tested to never flag normal English including accented words and emoji.</li>
+                            </ul>
+                        </div>
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--improved">Improved</span>
+                            <ul>
+                                <li>Every PHP file is now validated with a real PHP linter before release — zero syntax errors guaranteed</li>
+                                <li>Refreshed dashboard styling throughout — cleaner cards, smoother animations, better use of space</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── v1.8.3 ──────────────────────────────────────────────── -->
+                <div class="dfsas-changelog__version">
+                    <div class="dfsas-changelog__header">
+                        <span class="dfsas-changelog__num">1.8.3</span>
+                        <span class="dfsas-changelog__date">6 Jun 2026</span>
+                        <span class="dfsas-changelog__tag dfsas-changelog__tag--fix">Patch</span>
+                    </div>
+                    <div class="dfsas-changelog__body">
+                        <div class="dfsas-changelog__group">
+                            <span class="dfsas-changelog__group-label dfsas-changelog__group-label--fixed">Fixed</span>
+                            <ul>
+                                <li>The <code>wp_mail</code> content and blocklist filters were diverting legitimate contact-form emails (including Gmail addresses) to <code>blocked@localhost</code>. These filters now <strong>log only</strong> — never block. Blocking is handled exclusively by form-specific hooks (CF7, WPForms etc.) which run before the email is built and are far more reliable.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ── v1.8.2 ──────────────────────────────────────────────── -->
                 <div class="dfsas-changelog__version">
                     <div class="dfsas-changelog__header">

@@ -5,6 +5,7 @@ $ip_count      = count( DFSAS_Helpers::textarea_to_array( $opts['blocked_ips'] )
 $email_count   = count( DFSAS_Helpers::textarea_to_array( $opts['blocked_emails'] ) );
 $domain_count  = count( DFSAS_Helpers::textarea_to_array( $opts['blocked_domains'] ) );
 $keyword_count = count( DFSAS_Helpers::textarea_to_array( $opts['blocked_keywords'] ) );
+$username_count = count( DFSAS_Helpers::textarea_to_array( $opts['blocked_usernames'] ?? '' ) );
 $free_cap_ip    = !$is_pro && $ip_count >= 100;
 $free_cap_email = !$is_pro && $email_count >= 100;
 ?>
@@ -41,6 +42,14 @@ $free_cap_email = !$is_pro && $email_count >= 100;
                     <div class="dfsas-notice dfsas-notice--warning dfsas-notice--sm"><?php esc_html_e('Cap reached (100). Upgrade PRO for unlimited.','dadsfam-antispam'); ?></div>
                     <?php endif; ?>
                     <textarea name="dfsas_options[blocked_ips]" rows="10" class="large-text dfsas-blocklist-ta" placeholder="192.168.1.1&#10;10.0.0.0/24&#10;203.0.113.*"><?php echo esc_textarea($opts['blocked_ips']); ?></textarea>
+
+                    <div class="dfsas-setting-row" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--df-gray-2)">
+                        <label class="dfsas-toggle"><input type="checkbox" name="dfsas_options[block_login_ip]" value="1" <?php checked(!empty($opts['block_login_ip'])); ?> /><span class="dfsas-toggle__slider"></span></label>
+                        <div class="dfsas-setting__text">
+                            <strong><?php esc_html_e('Also block these IPs at login','dadsfam-antispam'); ?></strong>
+                            <p><?php esc_html_e('Stop blocklisted IPs from attempting to log in to WordPress, not just submitting forms. Respects your whitelist. (Failed-attempt / brute-force lockout is best handled by a dedicated login-security plugin.)','dadsfam-antispam'); ?></p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="dfsas-card">
@@ -71,6 +80,15 @@ $free_cap_email = !$is_pro && $email_count >= 100;
                     </h2>
                     <p class="dfsas-card__desc"><?php esc_html_e('Block messages containing these words/phrases. Case-insensitive. One per line.','dadsfam-antispam'); ?></p>
                     <textarea name="dfsas_options[blocked_keywords]" rows="10" class="large-text dfsas-blocklist-ta" placeholder="casino&#10;buy cheap seo&#10;viagra"><?php echo esc_textarea($opts['blocked_keywords']); ?></textarea>
+                </div>
+
+                <div class="dfsas-card">
+                    <h2 class="dfsas-card__title">
+                        <?php esc_html_e('Blocked Usernames','dadsfam-antispam'); ?>
+                        <span class="dfsas-count-badge"><?php echo esc_html($username_count); ?><?php if (!$is_pro) echo '/50'; ?></span>
+                    </h2>
+                    <p class="dfsas-card__desc"><?php esc_html_e('Block these usernames at WordPress registration. Case-insensitive. One per line. Use * as a wildcard — e.g. spam* blocks spam123, *bot blocks chatbot.','dadsfam-antispam'); ?></p>
+                    <textarea name="dfsas_options[blocked_usernames]" rows="10" class="large-text dfsas-blocklist-ta" placeholder="admin&#10;seo&#10;spam*&#10;*bot"><?php echo esc_textarea($opts['blocked_usernames'] ?? ''); ?></textarea>
                 </div>
 
             </div>

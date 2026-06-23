@@ -20,6 +20,8 @@ class DFSAS_Admin {
         add_action( 'wp_ajax_dfsas_test_email',          [ $this, 'ajax_test_email'         ] );
         add_action( 'wp_ajax_dfsas_upload_domain_list',  [ $this, 'ajax_upload_domain_list' ] );
         add_action( 'wp_ajax_dfsas_quick_block',         [ $this, 'ajax_quick_block'        ] );
+        add_action( 'wp_ajax_dfsas_export_settings',     [ $this, 'ajax_export_settings'   ] );
+        add_action( 'wp_ajax_dfsas_import_settings',     [ $this, 'ajax_import_settings'   ] );
     }
 
     // ─── Menu Registration ────────────────────────────────────────────────────
@@ -98,14 +100,26 @@ class DFSAS_Admin {
         );
         $clean = $existing; // carry everything forward by default
 
-        $context = sanitize_text_field( $raw['_context'] ?? 'all' );
+        $context = sanitize_text_field( $raw['_context'] ?? '' );
 
-        // ── Blocklist form: only update the four textarea fields ──────────────
+        // ── Programmatic save (Quick Block, Import, etc.) ─────────────────────
+        // These call update_option() directly with a complete, already-sanitised
+        // array — they do NOT submit a form so there is no _context. Return the
+        // array as-is; rebuilding it from form fields here would discard the
+        // freshly-added value (e.g. a Quick Block IP) and restore the old copy.
+        if ( '' === $context ) {
+            unset( $raw['_context'] );
+            return $raw;
+        }
+
+        // ── Blocklist form: only update the textarea fields ───────────────────
         if ( $context === 'blocklist' ) {
-            $clean['blocked_ips']      = sanitize_textarea_field( $raw['blocked_ips']      ?? '' );
-            $clean['blocked_emails']   = sanitize_textarea_field( $raw['blocked_emails']   ?? '' );
-            $clean['blocked_domains']  = sanitize_textarea_field( $raw['blocked_domains']  ?? '' );
-            $clean['blocked_keywords'] = sanitize_textarea_field( $raw['blocked_keywords'] ?? '' );
+            $clean['blocked_ips']       = sanitize_textarea_field( $raw['blocked_ips']       ?? '' );
+            $clean['blocked_emails']    = sanitize_textarea_field( $raw['blocked_emails']    ?? '' );
+            $clean['blocked_domains']   = sanitize_textarea_field( $raw['blocked_domains']   ?? '' );
+            $clean['blocked_keywords']  = sanitize_textarea_field( $raw['blocked_keywords']  ?? '' );
+            $clean['blocked_usernames'] = sanitize_textarea_field( $raw['blocked_usernames'] ?? '' );
+            $clean['block_login_ip']    = ! empty( $raw['block_login_ip'] ) ? 1 : 0;
             return $clean;
         }
 
@@ -118,6 +132,7 @@ class DFSAS_Admin {
             'enable_content_filter','enable_email_validator','enable_dnsbl','enable_geo_block',
             'enable_log_cleanup','enable_email_digest', 'enable_auto_update', 'enable_recaptcha',
             'enable_comments',
+            'comment_block_non_latin',
             'honeypot_cf7','honeypot_wpforms','honeypot_ninjaforms','honeypot_gravityforms',
             'honeypot_fluentforms','honeypot_generic',
             'block_disposable_emails','check_mx_records','block_html_in_message','log_blocked',
@@ -243,6 +258,52 @@ class DFSAS_Admin {
         header( 'Content-Disposition: attachment; filename="dfsas-spam-log-' . date( 'Y-m-d' ) . '.csv"' );
         echo $csv; // phpcs:ignore
         exit;
+    }
+
+    public function ajax_export_settings(): void {
+        $this->verify_ajax();
+        $opts = get_option( 'dfsas_options', [] );
+        // Never export secret keys — they're site-specific and sensitive
+        unset( $opts['recaptcha_secret_key'] );
+        $payload = [
+            'plugin'     => 'dadsfam-antispam',
+            'version'    => DFSAS_VERSION,
+            'exported'   => gmdate( 'c' ),
+            'options'    => $opts,
+        ];
+        wp_send_json_success( [ 'json' => wp_json_encode( $payload, JSON_PRETTY_PRINT ) ] );
+    }
+
+    public function ajax_import_settings(): void {
+        $this->verify_ajax();
+
+        $raw = isset( $_POST['json'] ) ? wp_unslash( $_POST['json'] ) : '';
+        if ( empty( $raw ) ) {
+            wp_send_json_error( __( 'No settings data received.', 'dadsfam-antispam' ) );
+        }
+
+        $data = json_decode( $raw, true );
+        if ( ! is_array( $data ) || empty( $data['options'] ) || ! is_array( $data['options'] ) ) {
+            wp_send_json_error( __( 'That does not look like a valid DadsFam Anti-Spam settings file.', 'dadsfam-antispam' ) );
+        }
+        if ( ( $data['plugin'] ?? '' ) !== 'dadsfam-antispam' ) {
+            wp_send_json_error( __( 'This settings file is for a different plugin.', 'dadsfam-antispam' ) );
+        }
+
+        // Merge imported options over the defaults so any missing keys are filled,
+        // and run them through the same sanitiser the settings form uses.
+        $defaults = DFSAS_Core::default_options();
+        $merged   = array_merge( $defaults, $data['options'] );
+
+        // Preserve the existing secret key (it's never exported)
+        $current = get_option( 'dfsas_options', [] );
+        if ( ! empty( $current['recaptcha_secret_key'] ) ) {
+            $merged['recaptcha_secret_key'] = $current['recaptcha_secret_key'];
+        }
+
+        update_option( 'dfsas_options', $merged );
+
+        wp_send_json_success( [ 'message' => __( '✅ Settings imported successfully. Reloading…', 'dadsfam-antispam' ) ] );
     }
 
     public function ajax_unblock_ip(): void {
